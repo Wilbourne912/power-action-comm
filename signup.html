@@ -25,30 +25,47 @@
   </div>
 
   <script>
-    const supabase = window.supabase.createClient(
+  let supabase;
+  
+  try {
+    supabase = window.supabase.createClient(
       'https://anhhyowtlagqkzkctsfc.supabase.co',
       'sb_publishable_-k5_rZOUq-Jioz_KZdxhCg_dEzKUOoz'
     );
+    document.getElementById('msg').textContent = 'Supabase connected.';
+    document.getElementById('msg').style.color = '#2ecc71';
+  } catch(e) {
+    document.getElementById('msg').textContent = 'Init error: ' + e.message;
+    document.getElementById('msg').style.color = 'red';
+  }
 
-    async function signUp() {
-      const name = document.getElementById('name').value;
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      const msg = document.getElementById('msg');
+  async function signUp() {
+    const name = document.getElementById('name').value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const msg = document.getElementById('msg');
 
-      const { error } = await supabase.auth.signUp({
+    msg.style.color = 'yellow';
+    msg.textContent = 'Trying...';
+
+    try {
+      const { data, error } = await supabase.auth.signUp({
         email, password,
         options: { data: { full_name: name } }
       });
 
       if (error) {
         msg.style.color = 'red';
-        msg.textContent = error.message;
+        msg.textContent = 'Error: ' + error.message;
       } else {
         msg.style.color = '#2ecc71';
         msg.textContent = 'Check your email to confirm your account!';
       }
+    } catch(e) {
+      msg.style.color = 'red';
+      msg.textContent = 'Caught: ' + e.message;
     }
+  }
   </script>
 </body>
 </html>
