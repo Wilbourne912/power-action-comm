@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin — Power Action Committee</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #000;
+      color: #fff;
+      font-family: 'Georgia', serif;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #000;
+      border-bottom: 2px solid #C9A84C;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      color: #C9A84C;
+      font-size: 1.1rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    #logout-btn {
+      background: transparent;
+      border: 1px solid #C9A84C;
+      color: #C9A84C;
+      padding: 6px 14px;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    #auth-check {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 80vh;
+      color: #C9A84C;
+      font-size: 1rem;
+      letter-spacing: 0.05em;
+    }
+
+    #admin-panel {
+      display: none;
+      padding: 24px 20px;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    h2 {
+      color: #C9A84C;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 20px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #222;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      color: #C9A84C;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 6px;
+    }
+
+    input[type="text"],
+    textarea,
+    select {
+      width: 100%;
+      background: #111;
+      border: 1px solid #333;
+      color: #fff;
+      padding: 12px;
+      font-size: 0.95rem;
+      font-family: 'Georgia', serif;
+      outline: none;
+    }
+
+    input[type="text"]:focus,
+    textarea:focus,
+    select:focus {
+      border-color: #C9A84C;
+    }
+
+    textarea {
+      min-height: 140px;
+      resize: vertical;
+    }
+
+    select option {
+      background: #111;
+    }
+
+    .file-label {
+      display: block;
+      background: #111;
+      border: 1px dashed #444;
+      color: #888;
+      padding: 14px;
+      text-align: center;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    .file-label:hover {
+      border-color: #C9A84C;
+      color: #C9A84C;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    #file-name {
+      font-size: 0.75rem;
+      color: #888;
+      margin-top: 6px;
+    }
+
+    #submit-btn {
+      width: 100%;
+      background: #C9A84C;
+      color: #000;
+      border: none;
+      padding: 14px;
+      font-size: 0.9rem;
+      font-weight: bold;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
+    #submit-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    #status-msg {
+      margin-top: 14px;
+      font-size: 0.85rem;
+      text-align: center;
+      min-height: 20px;
+      color: #C9A84C;
+    }
+
+    #status-msg.error {
+      color: #e55;
+    }
+
+    .posts-section {
+      margin-top: 40px;
+    }
+
+    .post-card {
+      background: #111;
+      border-left: 3px solid #C9A84C;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+
+    .post-card h3 {
+      color: #C9A84C;
+      font-size: 0.95rem;
+      margin-bottom: 4px;
+    }
+
+    .post-card p {
+      color: #aaa;
+      font-size: 0.8rem;
+    }
+
+    .post-card .meta {
+      font-size: 0.7rem;
+      color: #555;
+      margin-top: 6px;
+    }
+
+    .delete-btn {
+      background: transparent;
+      border: 1px solid #555;
+      color: #888;
+      padding: 4px 10px;
+      font-size: 0.7rem;
+      cursor: pointer;
+      margin-top: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .delete-btn:hover {
+      border-color: #e55;
+      color: #e55;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>PAC Admin</h1>
+  <button id="logout-btn" onclick="logout()">Sign Out</button>
+</header>
+
+<div id="auth-check">Verifying access...</div>
+
+<div id="admin-panel">
+
+  <h2>New Post</h2>
+
+  <div class="form-group">
+    <label for="post-type">Content Type</label>
+    <select id="post-type">
+      <option value="post">Text Post</option>
+      <option value="image">Image</option>
+      <option value="video">Video</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="post-title">Title</label>
+    <input type="text" id="post-title" placeholder="Enter a title..." />
+  </div>
+
+  <div class="form-group">
+    <label for="post-body">Body</label>
+    <textarea id="post-body" placeholder="Write your content here..."></textarea>
+  </div>
+
+  <div class="form-group" id="media-group">
+    <label>Media (Image or Video)</label>
+    <label class="file-label" for="media-file">
+      Tap to choose a file
+    </label>
+    <input type="file" id="media-file" accept="image/*,video/*" onchange="showFileName(this)" />
+    <div id="file-name">No file selected</div>
+  </div>
+
+  <button id="submit-btn" onclick="submitPost()">Publish Post</button>
+  <div id="status-msg"></div>
+
+  <div class="posts-section">
+    <h2>Published Posts</h2>
+    <div id="posts-list">Loading...</div>
+  </div>
+
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://anhhyowtlagqkzkctsfc.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_-k5_rZOUq-Jioz_KZdxhCg_dEzKUOoz';
+  const { createClient } = supabase;
+  const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  let currentUser = null;
+
+  async function init() {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) {
+      document.getElementById('auth-check').innerHTML = 'Access denied. <a href="/login.html" style="color:#C9A84C">Sign in</a>';
+      return;
+    }
+    currentUser = session.user;
+
+    const { data: member } = await sb.from('members').select('role').eq('id', currentUser.id).single();
+    if (!member || member.role !== 'admin') {
+      document.getElementById('auth-check').innerHTML = 'Access denied. Admins only.';
+      return;
+    }
+
+    document.getElementById('auth-check').style.display = 'none';
+    document.getElementById('admin-panel').style.display = 'block';
+    loadPosts();
+  }
+
+  function showFileName(input) {
+    const name = input.files[0]?.name || 'No file selected';
+    document.getElementById('file-name').textContent = name;
+    document.querySelector('.file-label').textContent = name;
+  }
+
+  async function submitPost() {
+    const title = document.getElementById('post-title').value.trim();
+    const body = document.getElementById('post-body').value.trim();
+    const type = document.getElementById('post-type').value;
+    const fileInput = document.getElementById('media-file');
+    const file = fileInput.files[0];
+    const btn = document.getElementById('submit-btn');
+    const status = document.getElementById('status-msg');
+
+    if (!title) {
+      status.textContent = 'Please enter a title.';
+      status.className = 'error';
+      return;
+    }
+
+    btn.disabled = true;
+    status.textContent = 'Publishing...';
+    status.className = '';
+
+    let media_url = null;
+
+    if (file) {
+      const ext = file.name.split('.').pop();
+      const path = `${Date.now()}.${ext}`;
+      const { error: uploadError } = await sb.storage.from('media').upload(path, file);
+      if (uploadError) {
+        status.textContent = 'Media upload failed: ' + uploadError.message;
+        status.className = 'error';
+        btn.disabled = false;
+        return;
+      }
+      const { data: urlData } = sb.storage.from('media').getPublicUrl(path);
+      media_url = urlData.publicUrl;
+    }
+
+    const { error } = await sb.from('posts').insert({
+      title,
+      body,
+      type,
+      media_url,
+      author_id: currentUser.id
+    });
+
+    if (error) {
+      status.textContent = 'Error: ' + error.message;
+      status.className = 'error';
+    } else {
+      status.textContent = 'Post published successfully.';
+      status.className = '';
+      document.getElementById('post-title').value = '';
+      document.getElementById('post-body').value = '';
+      fileInput.value = '';
+      document.getElementById('file-name').textContent = 'No file selected';
+      document.querySelector('.file-label').textContent = 'Tap to choose a file';
+      loadPosts();
+    }
+
+    btn.disabled = false;
+  }
+
+  async function loadPosts() {
+    const { data: posts, error } = await sb.from('posts').select('*').order('created_at', { ascending: false });
+    const list = document.getElementById('posts-list');
+    if (error || !posts?.length) {
+      list.innerHTML = '<p style="color:#555;font-size:0.85rem">No posts yet.</p>';
+      return;
+    }
+    list.innerHTML = posts.map(p => `
+      <div class="post-card">
+        <h3>${p.title}</h3>
+        <p>${p.body ? p.body.substring(0, 100) + (p.body.length > 100 ? '...' : '') : 'No body text'}</p>
+        <div class="meta">${p.type.toUpperCase()} · ${new Date(p.created_at).toLocaleDateString()}</div>
+        <button class="delete-btn" onclick="deletePost('${p.id}')">Delete</button>
+      </div>
+    `).join('');
+  }
+
+  async function deletePost(id) {
+    if (!confirm('Delete this post?')) return;
+    await sb.from('posts').delete().eq('id', id);
+    loadPosts();
+  }
+
+  async function logout() {
+    await sb.auth.signOut();
+    window.location.href = '/login.html';
+  }
+
+  init();
+</script>
+
+</body>
+    </html>
+    
