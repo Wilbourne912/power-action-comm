@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Admin — Power Action Committee</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -15,6 +15,7 @@
       min-height: 100vh;
     }
 
+    /* HEADER */
     header {
       background: #000;
       border-bottom: 2px solid #C9A84C;
@@ -24,22 +25,10 @@
       align-items: center;
     }
 
-    header a.logo {
-      display: flex;
-      align-items: center;
-      text-decoration: none;
-    }
+    header a.logo img { height: 40px; width: auto; text-decoration: none; }
+    header a.logo { display: flex; align-items: center; text-decoration: none; }
 
-    header a.logo img {
-      height: 40px;
-      width: auto;
-    }
-
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+    .header-right { display: flex; align-items: center; gap: 10px; }
 
     .nav-btn {
       background: transparent;
@@ -54,6 +43,7 @@
       display: inline-block;
     }
 
+    /* AUTH CHECK */
     #auth-check {
       display: flex;
       align-items: center;
@@ -64,13 +54,40 @@
       letter-spacing: 0.05em;
     }
 
-    #admin-panel {
-      display: none;
-      padding: 24px 20px;
-      max-width: 680px;
-      margin: 0 auto;
+    /* TABS */
+    #admin-panel { display: none; }
+
+    .tabs {
+      display: flex;
+      border-bottom: 2px solid #1a1a1a;
+      background: #000;
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
 
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: #555;
+      padding: 14px 20px;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+    }
+
+    .tab-btn.active {
+      color: #C9A84C;
+      border-bottom-color: #C9A84C;
+    }
+
+    .tab-content { display: none; padding: 24px 20px; max-width: 680px; margin: 0 auto; }
+    .tab-content.active { display: block; }
+
+    /* FORM ELEMENTS */
     h2 {
       color: #C9A84C;
       font-size: 1rem;
@@ -81,9 +98,7 @@
       border-bottom: 1px solid #222;
     }
 
-    .form-group {
-      margin-bottom: 16px;
-    }
+    .form-group { margin-bottom: 16px; }
 
     label {
       display: block;
@@ -95,6 +110,7 @@
     }
 
     input[type="text"],
+    input[type="email"],
     textarea,
     select {
       width: 100%;
@@ -108,19 +124,13 @@
     }
 
     input[type="text"]:focus,
+    input[type="email"]:focus,
     textarea:focus,
-    select:focus {
-      border-color: #C9A84C;
-    }
+    select:focus { border-color: #C9A84C; }
 
-    textarea {
-      min-height: 140px;
-      resize: vertical;
-    }
+    textarea { min-height: 100px; resize: vertical; }
 
-    select option {
-      background: #111;
-    }
+    select option { background: #111; }
 
     .file-label {
       display: block;
@@ -134,22 +144,17 @@
       transition: border-color 0.2s;
     }
 
-    .file-label:hover {
-      border-color: #C9A84C;
-      color: #C9A84C;
-    }
+    .file-label:hover { border-color: #C9A84C; color: #C9A84C; }
+    input[type="file"] { display: none; }
 
-    input[type="file"] {
-      display: none;
-    }
-
-    #file-name {
+    .file-name {
       font-size: 0.75rem;
       color: #888;
       margin-top: 6px;
     }
 
-    #submit-btn {
+    /* BUTTONS */
+    .btn-gold {
       width: 100%;
       background: #C9A84C;
       color: #000;
@@ -163,12 +168,34 @@
       margin-top: 8px;
     }
 
-    #submit-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
+    .btn-gold:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-outline-gold {
+      background: transparent;
+      border: 1px solid #C9A84C;
+      color: #C9A84C;
+      padding: 8px 16px;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      cursor: pointer;
     }
 
-    #status-msg {
+    .btn-danger {
+      background: transparent;
+      border: 1px solid #555;
+      color: #888;
+      padding: 4px 10px;
+      font-size: 0.7rem;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .btn-danger:hover { border-color: #e55; color: #e55; }
+
+    /* STATUS */
+    .status-msg {
       margin-top: 14px;
       font-size: 0.85rem;
       text-align: center;
@@ -176,14 +203,9 @@
       color: #C9A84C;
     }
 
-    #status-msg.error {
-      color: #e55;
-    }
+    .status-msg.error { color: #e55; }
 
-    .posts-section {
-      margin-top: 40px;
-    }
-
+    /* POSTS LIST */
     .post-card {
       background: #111;
       border-left: 3px solid #C9A84C;
@@ -191,39 +213,46 @@
       margin-bottom: 12px;
     }
 
-    .post-card h3 {
-      color: #C9A84C;
-      font-size: 0.95rem;
-      margin-bottom: 4px;
+    .post-card h3 { color: #C9A84C; font-size: 0.95rem; margin-bottom: 4px; }
+    .post-card p { color: #aaa; font-size: 0.8rem; }
+    .post-card .meta { font-size: 0.7rem; color: #555; margin-top: 6px; }
+
+    /* FOCUS CARDS */
+    .focus-card-item {
+      background: #111;
+      border-left: 3px solid #C9A84C;
+      padding: 14px;
+      margin-bottom: 12px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
     }
 
-    .post-card p {
-      color: #aaa;
-      font-size: 0.8rem;
+    .focus-card-item img {
+      width: 70px;
+      height: 60px;
+      object-fit: cover;
+      flex-shrink: 0;
     }
 
-    .post-card .meta {
-      font-size: 0.7rem;
-      color: #555;
-      margin-top: 6px;
+    .focus-card-info { flex: 1; }
+    .focus-card-info h3 { color: #C9A84C; font-size: 0.9rem; margin-bottom: 4px; }
+    .focus-card-info p { color: #aaa; font-size: 0.78rem; }
+
+    .divider {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      margin: 28px 0;
     }
 
-    .delete-btn {
-      background: transparent;
-      border: 1px solid #555;
-      color: #888;
-      padding: 4px 10px;
-      font-size: 0.7rem;
-      cursor: pointer;
-      margin-top: 8px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+    .settings-row {
+      background: #111;
+      border-left: 3px solid #333;
+      padding: 14px;
+      margin-bottom: 2px;
     }
 
-    .delete-btn:hover {
-      border-color: #e55;
-      color: #e55;
-    }
+    .settings-row label { color: #777; margin-bottom: 4px; }
   </style>
 </head>
 <body>
@@ -242,42 +271,111 @@
 
 <div id="admin-panel">
 
-  <h2>New Post</h2>
-
-  <div class="form-group">
-    <label for="post-type">Content Type</label>
-    <select id="post-type">
-      <option value="post">Text Post</option>
-      <option value="image">Image</option>
-      <option value="video">Video</option>
-    </select>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('posts')">Posts</button>
+    <button class="tab-btn" onclick="switchTab('settings')">Site Settings</button>
+    <button class="tab-btn" onclick="switchTab('cards')">Focus Cards</button>
   </div>
 
-  <div class="form-group">
-    <label for="post-title">Title</label>
-    <input type="text" id="post-title" placeholder="Enter a title..." />
-  </div>
+  <!-- POSTS TAB -->
+  <div class="tab-content active" id="tab-posts">
+    <h2>New Post</h2>
 
-  <div class="form-group">
-    <label for="post-body">Body</label>
-    <textarea id="post-body" placeholder="Write your content here..."></textarea>
-  </div>
+    <div class="form-group">
+      <label>Content Type</label>
+      <select id="post-type">
+        <option value="post">Text Post</option>
+        <option value="image">Image</option>
+        <option value="video">Video</option>
+      </select>
+    </div>
 
-  <div class="form-group" id="media-group">
-    <label>Media (Image or Video)</label>
-    <label class="file-label" for="media-file">
-      Tap to choose a file
-    </label>
-    <input type="file" id="media-file" accept="image/*,video/*" onchange="showFileName(this)" />
-    <div id="file-name">No file selected</div>
-  </div>
+    <div class="form-group">
+      <label>Title</label>
+      <input type="text" id="post-title" placeholder="Enter a title..." />
+    </div>
 
-  <button id="submit-btn" onclick="submitPost()">Publish Post</button>
-  <div id="status-msg"></div>
+    <div class="form-group">
+      <label>Body</label>
+      <textarea id="post-body" placeholder="Write your content here..."></textarea>
+    </div>
 
-  <div class="posts-section">
+    <div class="form-group">
+      <label>Media (Image or Video)</label>
+      <label class="file-label" for="post-media-file">Tap to choose a file</label>
+      <input type="file" id="post-media-file" accept="image/*,video/*" onchange="showFileName(this,'post-media-label','post-file-name')" />
+      <div class="file-name" id="post-file-name">No file selected</div>
+    </div>
+
+    <button class="btn-gold" id="submit-post-btn" onclick="submitPost()">Publish Post</button>
+    <div class="status-msg" id="post-status"></div>
+
+    <hr class="divider" />
     <h2>Published Posts</h2>
     <div id="posts-list">Loading...</div>
+  </div>
+
+  <!-- SITE SETTINGS TAB -->
+  <div class="tab-content" id="tab-settings">
+    <h2>Site Settings</h2>
+    <p style="color:#555;font-size:0.8rem;margin-bottom:20px">Changes go live on the homepage instantly after saving.</p>
+
+    <div class="form-group">
+      <label>Hero Title</label>
+      <input type="text" id="hero_title" placeholder="Loading..." />
+    </div>
+
+    <div class="form-group">
+      <label>Hero Subtitle</label>
+      <textarea id="hero_subtitle" placeholder="Loading..."></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>About Us Title</label>
+      <input type="text" id="about_title" placeholder="Loading..." />
+    </div>
+
+    <div class="form-group">
+      <label>About Us Text</label>
+      <textarea id="about_text" placeholder="Loading..."></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Contact Email</label>
+      <input type="email" id="contact_email" placeholder="Loading..." />
+    </div>
+
+    <button class="btn-gold" id="save-settings-btn" onclick="saveSettings()">Save Settings</button>
+    <div class="status-msg" id="settings-status"></div>
+  </div>
+
+  <!-- FOCUS CARDS TAB -->
+  <div class="tab-content" id="tab-cards">
+    <h2>Add Focus Card</h2>
+
+    <div class="form-group">
+      <label>Card Title</label>
+      <input type="text" id="card-title" placeholder="e.g. Voter Rights" />
+    </div>
+
+    <div class="form-group">
+      <label>Description</label>
+      <textarea id="card-desc" placeholder="Short description..." style="min-height:80px"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Card Image</label>
+      <label class="file-label" for="card-image-file">Tap to choose an image</label>
+      <input type="file" id="card-image-file" accept="image/*" onchange="showFileName(this,'card-image-label','card-file-name')" />
+      <div class="file-name" id="card-file-name">No file selected</div>
+    </div>
+
+    <button class="btn-gold" id="add-card-btn" onclick="addCard()">Add Card</button>
+    <div class="status-msg" id="card-status"></div>
+
+    <hr class="divider" />
+    <h2>Current Focus Cards</h2>
+    <div id="cards-list">Loading...</div>
   </div>
 
 </div>
@@ -285,11 +383,11 @@
 <script>
   const SUPABASE_URL = 'https://anhhyowtlagqkzkctsfc.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_-k5_rZOUq-Jioz_KZdxhCg_dEzKUOoz';
-  const { createClient } = supabase;
-  const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   let currentUser = null;
 
+  // ── AUTH ──
   async function init() {
     const { data: { session } } = await sb.auth.getSession();
     if (!session) {
@@ -307,87 +405,86 @@
     document.getElementById('auth-check').style.display = 'none';
     document.getElementById('admin-panel').style.display = 'block';
     loadPosts();
+    loadSettings();
+    loadCards();
   }
 
-  function showFileName(input) {
+  async function logout() {
+    await sb.auth.signOut();
+    window.location.href = '/login.html';
+  }
+
+  // ── TABS ──
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach((b, i) => {
+      b.classList.toggle('active', ['posts','settings','cards'][i] === tab);
+    });
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+  }
+
+  // ── FILE HELPERS ──
+  function showFileName(input, labelId, nameId) {
     const name = input.files[0]?.name || 'No file selected';
-    document.getElementById('file-name').textContent = name;
-    document.querySelector('.file-label').textContent = name;
+    document.getElementById(nameId).textContent = name;
+    input.previousElementSibling.textContent = name;
   }
 
+  async function uploadFile(file) {
+    const ext = file.name.split('.').pop();
+    const path = `${Date.now()}.${ext}`;
+    const { error } = await sb.storage.from('media').upload(path, file);
+    if (error) throw error;
+    return sb.storage.from('media').getPublicUrl(path).data.publicUrl;
+  }
+
+  // ── POSTS ──
   async function submitPost() {
     const title = document.getElementById('post-title').value.trim();
     const body = document.getElementById('post-body').value.trim();
     const type = document.getElementById('post-type').value;
-    const fileInput = document.getElementById('media-file');
-    const file = fileInput.files[0];
-    const btn = document.getElementById('submit-btn');
-    const status = document.getElementById('status-msg');
+    const file = document.getElementById('post-media-file').files[0];
+    const btn = document.getElementById('submit-post-btn');
+    const status = document.getElementById('post-status');
 
-    if (!title) {
-      status.textContent = 'Please enter a title.';
-      status.className = 'error';
-      return;
-    }
+    if (!title) { status.textContent = 'Please enter a title.'; status.className = 'status-msg error'; return; }
 
     btn.disabled = true;
     status.textContent = 'Publishing...';
-    status.className = '';
+    status.className = 'status-msg';
 
     let media_url = null;
-
     if (file) {
-      const ext = file.name.split('.').pop();
-      const path = `${Date.now()}.${ext}`;
-      const { error: uploadError } = await sb.storage.from('media').upload(path, file);
-      if (uploadError) {
-        status.textContent = 'Media upload failed: ' + uploadError.message;
-        status.className = 'error';
-        btn.disabled = false;
-        return;
-      }
-      const { data: urlData } = sb.storage.from('media').getPublicUrl(path);
-      media_url = urlData.publicUrl;
+      try { media_url = await uploadFile(file); }
+      catch(e) { status.textContent = 'Upload failed: ' + e.message; status.className = 'status-msg error'; btn.disabled = false; return; }
     }
 
-    const { error } = await sb.from('posts').insert({
-      title,
-      body,
-      type,
-      media_url,
-      author_id: currentUser.id
-    });
-
+    const { error } = await sb.from('posts').insert({ title, body, type, media_url, author_id: currentUser.id });
     if (error) {
       status.textContent = 'Error: ' + error.message;
-      status.className = 'error';
+      status.className = 'status-msg error';
     } else {
-      status.textContent = 'Post published successfully.';
-      status.className = '';
+      status.textContent = 'Post published.';
+      status.className = 'status-msg';
       document.getElementById('post-title').value = '';
       document.getElementById('post-body').value = '';
-      fileInput.value = '';
-      document.getElementById('file-name').textContent = 'No file selected';
-      document.querySelector('.file-label').textContent = 'Tap to choose a file';
+      document.getElementById('post-media-file').value = '';
+      document.getElementById('post-file-name').textContent = 'No file selected';
       loadPosts();
     }
-
     btn.disabled = false;
   }
 
   async function loadPosts() {
-    const { data: posts, error } = await sb.from('posts').select('*').order('created_at', { ascending: false });
+    const { data: posts } = await sb.from('posts').select('*').order('created_at', { ascending: false });
     const list = document.getElementById('posts-list');
-    if (error || !posts?.length) {
-      list.innerHTML = '<p style="color:#555;font-size:0.85rem">No posts yet.</p>';
-      return;
-    }
+    if (!posts?.length) { list.innerHTML = '<p style="color:#555;font-size:0.85rem">No posts yet.</p>'; return; }
     list.innerHTML = posts.map(p => `
       <div class="post-card">
         <h3>${p.title}</h3>
-        <p>${p.body ? p.body.substring(0, 100) + (p.body.length > 100 ? '...' : '') : 'No body text'}</p>
+        <p>${p.body ? p.body.substring(0,100) + (p.body.length > 100 ? '...' : '') : 'No body text'}</p>
         <div class="meta">${p.type.toUpperCase()} · ${new Date(p.created_at).toLocaleDateString()}</div>
-        <button class="delete-btn" onclick="deletePost('${p.id}')">Delete</button>
+        <button class="btn-danger" onclick="deletePost('${p.id}')">Delete</button>
       </div>
     `).join('');
   }
@@ -398,13 +495,101 @@
     loadPosts();
   }
 
-  async function logout() {
-    await sb.auth.signOut();
-    window.location.href = '/login.html';
+  // ── SITE SETTINGS ──
+  async function loadSettings() {
+    const { data } = await sb.from('site_settings').select('*');
+    if (!data) return;
+    data.forEach(row => {
+      const el = document.getElementById(row.key);
+      if (el) el.value = row.value;
+    });
+  }
+
+  async function saveSettings() {
+    const keys = ['hero_title','hero_subtitle','about_title','about_text','contact_email'];
+    const btn = document.getElementById('save-settings-btn');
+    const status = document.getElementById('settings-status');
+    btn.disabled = true;
+    status.textContent = 'Saving...';
+    status.className = 'status-msg';
+
+    for (const key of keys) {
+      const value = document.getElementById(key).value.trim();
+      const { error } = await sb.from('site_settings').upsert({ key, value });
+      if (error) {
+        status.textContent = 'Error saving ' + key + ': ' + error.message;
+        status.className = 'status-msg error';
+        btn.disabled = false;
+        return;
+      }
+    }
+
+    status.textContent = 'Settings saved. Homepage updated.';
+    status.className = 'status-msg';
+    btn.disabled = false;
+  }
+
+  // ── FOCUS CARDS ──
+  async function addCard() {
+    const title = document.getElementById('card-title').value.trim();
+    const description = document.getElementById('card-desc').value.trim();
+    const file = document.getElementById('card-image-file').files[0];
+    const btn = document.getElementById('add-card-btn');
+    const status = document.getElementById('card-status');
+
+    if (!title) { status.textContent = 'Please enter a title.'; status.className = 'status-msg error'; return; }
+
+    btn.disabled = true;
+    status.textContent = 'Adding card...';
+    status.className = 'status-msg';
+
+    let image_url = null;
+    if (file) {
+      try { image_url = await uploadFile(file); }
+      catch(e) { status.textContent = 'Upload failed: ' + e.message; status.className = 'status-msg error'; btn.disabled = false; return; }
+    }
+
+    const { error } = await sb.from('focus_cards').insert({ title, description, image_url });
+    if (error) {
+      status.textContent = 'Error: ' + error.message;
+      status.className = 'status-msg error';
+    } else {
+      status.textContent = 'Card added.';
+      status.className = 'status-msg';
+      document.getElementById('card-title').value = '';
+      document.getElementById('card-desc').value = '';
+      document.getElementById('card-image-file').value = '';
+      document.getElementById('card-file-name').textContent = 'No file selected';
+      loadCards();
+    }
+    btn.disabled = false;
+  }
+
+  async function loadCards() {
+    const { data: cards } = await sb.from('focus_cards').select('*').order('display_order');
+    const list = document.getElementById('cards-list');
+    if (!cards?.length) { list.innerHTML = '<p style="color:#555;font-size:0.85rem">No cards yet.</p>'; return; }
+    list.innerHTML = cards.map(c => `
+      <div class="focus-card-item">
+        ${c.image_url ? `<img src="${c.image_url}" alt="${c.title}" />` : '<div style="width:70px;height:60px;background:#222;flex-shrink:0"></div>'}
+        <div class="focus-card-info">
+          <h3>${c.title}</h3>
+          <p>${c.description || ''}</p>
+          <button class="btn-danger" style="margin-top:8px" onclick="deleteCard('${c.id}')">Delete</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function deleteCard(id) {
+    if (!confirm('Delete this card?')) return;
+    await sb.from('focus_cards').delete().eq('id', id);
+    loadCards();
   }
 
   init();
 </script>
 
 </body>
-</html>
+  </html>
+  
