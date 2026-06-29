@@ -1,202 +1,573 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Justice & Reform Georgia</title>
-    <style>
-        /* Color Palette: Black (#111) and Gold (#D4AF37) */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #111111;
-            color: #ffffff;
-            line-height: 1.6;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Power Action Committee</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        /* Navigation Bar */
-        header {
-            background-color: #000000;
-            border-bottom: 3px solid #D4AF37;
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #111111;
+      color: #ffffff;
+      line-height: 1.6;
+    }
 
-        .logo img {
-            height: 60px; /* Adjust based on your logo shape */
-            width: auto;
-        }
+    /* ── HEADER ── */
+    header {
+      background-color: #000000;
+      border-bottom: 3px solid #D4AF37;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
 
-        nav a {
-            color: #D4AF37;
-            text-decoration: none;
-            margin-left: 20px;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
+    .logo img {
+      height: 60px;
+      width: auto;
+    }
 
-        nav a:hover {
-            color: #ffffff;
-        }
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
 
-        /* Hero Section */
-        .hero {
-            text-align: center;
-            padding: 5rem 2rem;
-            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9)), url('https://i.ibb.co/ZpCgNvdM/download.webp') no-repeat center center/cover;
-            border-bottom: 2px solid #D4AF37;
-        }
+    nav a {
+      color: #D4AF37;
+      text-decoration: none;
+      font-weight: bold;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      letter-spacing: 0.05em;
+    }
 
-        .hero h1 {
-            color: #D4AF37;
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
+    nav a:hover { color: #fff; }
 
-        .hero p {
-            font-size: 1.2rem;
-            max-width: 800px;
-            margin: 0 auto 2rem auto;
-        }
+    /* ── USER DROPDOWN ── */
+    .user-menu {
+      position: relative;
+    }
 
-        .cta-btn {
-            background-color: #D4AF37;
-            color: #000000;
-            padding: 0.8rem 2rem;
-            text-decoration: none;
-            font-weight: bold;
-            text-transform: uppercase;
-            border-radius: 4px;
-            transition: 0.3s;
-        }
+    .user-trigger {
+      background: transparent;
+      border: 1px solid #D4AF37;
+      color: #D4AF37;
+      padding: 6px 14px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
 
-        .cta-btn:hover {
-            background-color: #ffffff;
-        }
+    .user-trigger span.arrow {
+      font-size: 0.6rem;
+      transition: transform 0.2s;
+    }
 
-        /* Content Gallery Section */
-        .gallery-section {
-            padding: 4rem 2rem;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+    .user-trigger.open span.arrow {
+      transform: rotate(180deg);
+    }
 
-        .gallery-section h2 {
-            color: #D4AF37;
-            text-align: center;
-            margin-bottom: 3rem;
-            text-transform: uppercase;
-        }
+    .dropdown {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: calc(100% + 8px);
+      background: #000;
+      border: 1px solid #D4AF37;
+      min-width: 180px;
+      z-index: 200;
+    }
 
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-        }
+    .dropdown.show { display: block; }
 
-        .card {
-            background-color: #1a1a1a;
-            border: 1px solid #333;
-            border-radius: 8px;
-            overflow: hidden;
-            transition: 0.3s;
-        }
+    .dropdown a, .dropdown button {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 12px 16px;
+      color: #D4AF37;
+      text-decoration: none;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      border-bottom: 1px solid #1a1a1a;
+    }
 
-        .card:hover {
-            border-color: #D4AF37;
-        }
+    .dropdown a:hover, .dropdown button:hover {
+      background: #1a1a1a;
+      color: #fff;
+    }
 
-        .card img {
-    width: 100%;
-    height: 250px;
-    object-fit: cover;
-    object-position: top center; /* Add this line */
-        }
-        
+    .dropdown .admin-link {
+      color: #D4AF37;
+      border-top: 1px solid #333;
+    }
 
-        .card-content {
-            padding: 1.5rem;
-        }
+    /* guest buttons */
+    .auth-btns { display: flex; gap: 10px; }
+    .btn-outline {
+      border: 1px solid #D4AF37;
+      color: #D4AF37;
+      padding: 6px 16px;
+      text-decoration: none;
+      font-size: 0.8rem;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+    .btn-solid {
+      background: #D4AF37;
+      color: #000;
+      padding: 6px 16px;
+      text-decoration: none;
+      font-size: 0.8rem;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
 
-        .card-content h3 {
-            color: #D4AF37;
-            margin-top: 0;
-        }
+    /* ── HERO ── */
+    .hero {
+      text-align: center;
+      padding: 5rem 1rem 3rem;
+      background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9)), url('https://i.ibb.co/ZpCgNvdM/download.webp') center/cover no-repeat;
+      border-bottom: 2px solid #D4AF37;
+    }
 
-        /* Footer */
-        footer {
-            background-color: #000000;
-            text-align: center;
-            padding: 2rem;
-            border-top: 1px solid #333;
-            color: #888;
-            font-size: 0.9rem;
-        }
-    </style>
+    .hero h1 {
+      color: #D4AF37;
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .hero p {
+      font-size: 1.2rem;
+      max-width: 800px;
+      margin: 0 auto 2rem auto;
+      color: #fff;
+    }
+
+    .hero-btns {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      max-width: 300px;
+      margin: 0 auto;
+    }
+
+    .cta-btn {
+      display: block;
+      width: 100%;
+      text-align: center;
+      background-color: #D4AF37;
+      color: #000000;
+      padding: 0.8rem 2rem;
+      text-decoration: none;
+      font-weight: bold;
+      text-transform: uppercase;
+      border-radius: 4px;
+      transition: 0.3s;
+    }
+
+    .cta-btn:hover { background-color: #ffffff; }
+
+    .cta-btn.outline {
+      background: transparent;
+      color: #D4AF37;
+      border: 1px solid #D4AF37;
+    }
+
+    .cta-btn.outline:hover { background: #D4AF37; color: #000; }
+
+    /* ── ABOUT ── */
+    #about {
+      padding: 4rem 2rem;
+      max-width: 860px;
+      margin: 0 auto;
+      text-align: center;
+      border-bottom: 1px solid #222;
+    }
+
+    #about h2 {
+      color: #D4AF37;
+      font-size: 1.8rem;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+      letter-spacing: 1px;
+    }
+
+    #about p {
+      color: #ccc;
+      font-size: 1rem;
+      line-height: 1.8;
+    }
+
+    /* ── LATEST POSTS ── */
+    #latest {
+      padding: 3rem 2rem 4rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    #latest h2 {
+      color: #D4AF37;
+      font-size: 1.4rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 0.4rem;
+    }
+
+    .section-sub {
+      color: #555;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 2rem;
+    }
+
+    .section-sub a {
+      color: #D4AF37;
+      text-decoration: none;
+    }
+
+    .posts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .post-card {
+      background: #1a1a1a;
+      border-left: 3px solid #D4AF37;
+      padding: 1.2rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .post-card:hover { background: #222; }
+
+    .post-card .badge {
+      font-size: 0.65rem;
+      color: #D4AF37;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 6px;
+    }
+
+    .post-card h3 {
+      color: #fff;
+      font-size: 1rem;
+      margin-bottom: 6px;
+      line-height: 1.4;
+    }
+
+    .post-card p {
+      color: #888;
+      font-size: 0.82rem;
+      line-height: 1.6;
+      margin-bottom: 10px;
+    }
+
+    .post-card img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      margin-top: 8px;
+      border-top: 1px solid #333;
+    }
+
+    .post-card .date {
+      font-size: 0.7rem;
+      color: #444;
+      margin-top: 8px;
+    }
+
+    #posts-loading {
+      color: #444;
+      font-size: 0.85rem;
+      padding: 1rem 0;
+    }
+
+    /* ── FOCUS AREAS ── */
+    .gallery-section {
+      padding: 4rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      border-top: 1px solid #222;
+    }
+
+    .gallery-section h2 {
+      color: #D4AF37;
+      text-align: center;
+      margin-bottom: 3rem;
+      text-transform: uppercase;
+      font-size: 1.6rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+
+    .card {
+      background-color: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      overflow: hidden;
+      transition: 0.3s;
+    }
+
+    .card:hover { border-color: #D4AF37; }
+
+    .card img {
+      width: 100%;
+      height: 250px;
+      object-fit: cover;
+      object-position: top center;
+    }
+
+    .card-content { padding: 1.5rem; }
+
+    .card-content h3 {
+      color: #D4AF37;
+      margin-top: 0;
+    }
+
+    .card p { color: #aaa; font-size: 0.9rem; margin-bottom: 1rem; }
+
+    /* ── CONTACT ── */
+    #contact {
+      padding: 4rem 2rem;
+      text-align: center;
+      border-top: 1px solid #222;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    #contact h2 {
+      color: #D4AF37;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+
+    #contact p { color: #aaa; margin-bottom: 1.5rem; }
+
+    #contact a {
+      color: #D4AF37;
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background-color: #000000;
+      text-align: center;
+      padding: 2rem;
+      border-top: 1px solid #333;
+      color: #888;
+      font-size: 0.9rem;
+    }
+  </style>
 </head>
 <body>
 
-    <!-- Header & Logo -->
-    <header>
-        <div class="logo">
-            <!-- Replace with your ImgBB Logo Direct Link -->
-            <img src="https://i.ibb.co/ZpCgNvdM/download.webp" alt="Civil Rights Org Logo">
+<!-- HEADER -->
+<header>
+  <a class="logo" href="/index.html">
+    <img src="https://i.ibb.co/ZpCgNvdM/download.webp" alt="Civil Rights Org Logo" />
+  </a>
+
+  <nav>
+    <a href="#about">Our Mission</a>
+    <a href="#focus">Focus Areas</a>
+    <a href="#contact">Contact</a>
+  </nav>
+
+  <!-- Guest buttons (shown by default, hidden when logged in) -->
+  <div class="auth-btns" id="guest-btns">
+    <a href="/signup.html" class="btn-solid">Join</a>
+    <a href="/login.html" class="btn-outline">Sign In</a>
+  </div>
+
+  <!-- User dropdown (hidden by default, shown when logged in) -->
+  <div class="user-menu" id="user-menu" style="display:none">
+    <button class="user-trigger" id="user-trigger" onclick="toggleDropdown()">
+      <span id="header-name">Member</span>
+      <span class="arrow">▼</span>
+    </button>
+    <div class="dropdown" id="dropdown">
+      <a href="/dashboard.html">Dashboard</a>
+      <a href="/blog.html">Updates</a>
+      <a href="/dashboard.html#dues">Pay Dues</a>
+      <a href="/admin.html" id="admin-link" style="display:none" class="admin-link">⚙ Admin Panel</a>
+      <button onclick="logout()">Sign Out</button>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <h1>Fighting for Justice in Georgia</h1>
+  <p>Advancing civil rights, systemic reform, and equal justice under the law for all Georgians.</p>
+  <div class="hero-btns" id="hero-btns">
+    <a href="/signup.html" class="cta-btn">Create Account</a>
+    <a href="/login.html" class="cta-btn outline">Sign In</a>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <h2>Our Mission</h2>
+  <p>The Power Action Committee is a Georgia-based nonprofit civil rights organization dedicated to advancing equal justice, systemic reform, and community empowerment. We fight for the rights of all Georgians through advocacy, organizing, and direct action.</p>
+</section>
+
+<!-- LATEST POSTS -->
+<section id="latest">
+  <h2>Latest Updates</h2>
+  <p class="section-sub">News and announcements &nbsp;·&nbsp; <a href="/blog.html">View all →</a></p>
+  <div class="posts-grid" id="posts-grid">
+    <div id="posts-loading">Loading updates...</div>
+  </div>
+</section>
+
+<!-- FOCUS AREAS -->
+<section class="gallery-section" id="focus">
+  <h2>Our Core Focus</h2>
+  <div class="grid">
+    <div class="card">
+      <img src="https://i.ibb.co/tVZQWmz/FB-IMG-1782436384142.jpg" alt="Legal Advocacy" />
+      <div class="card-content">
+        <h3>Legal Advocacy</h3>
+        <p>Protecting the constitutional rights of individuals and fighting systemic bias within the Georgia justice system.</p>
+      </div>
+    </div>
+    <div class="card">
+      <img src="https://i.ibb.co/04PccP6/FB-IMG-1782436375231.jpg" alt="Community Reform" />
+      <div class="card-content">
+        <h3>Community Policy Reform</h3>
+        <p>Working directly with local policy makers to change unfair laws and promote accountability across the state.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <h2>Contact Us</h2>
+  <p>Have questions or want to get involved? Reach out to the Power Action Committee.</p>
+  <p><a href="mailto:info@poweractioncommittee.org">info@poweractioncommittee.org</a></p>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>&copy; 2026 Justice & Reform Georgia. All Rights Reserved.</p>
+</footer>
+
+<script>
+  const sb = window.supabase.createClient(
+    'https://anhhyowtlagqkzkctsfc.supabase.co',
+    'sb_publishable_-k5_rZOUq-Jioz_KZdxhCg_dEzKUOoz'
+  );
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', function(e) {
+    if (!document.getElementById('user-menu').contains(e.target)) {
+      document.getElementById('dropdown').classList.remove('show');
+      document.getElementById('user-trigger')?.classList.remove('open');
+    }
+  });
+
+  function toggleDropdown() {
+    document.getElementById('dropdown').classList.toggle('show');
+    document.getElementById('user-trigger').classList.toggle('open');
+  }
+
+  async function logout() {
+    await sb.auth.signOut();
+    window.location.reload();
+  }
+
+  async function init() {
+    // Check session
+    const { data: { user } } = await sb.auth.getUser();
+
+    if (user) {
+      // Show user menu, hide guest buttons
+      document.getElementById('guest-btns').style.display = 'none';
+      document.getElementById('user-menu').style.display = 'block';
+
+      // Set name
+      const name = user.user_metadata?.full_name || user.email.split('@')[0];
+      document.getElementById('header-name').textContent = name;
+
+      // Hide hero sign in buttons, show dashboard link instead
+      document.getElementById('hero-btns').innerHTML =
+        '<a href="/dashboard.html" class="cta-btn">Go to Dashboard</a>';
+
+      // Check admin role
+      const { data: member } = await sb.from('members').select('role').eq('id', user.id).single();
+      if (member && member.role === 'admin') {
+        document.getElementById('admin-link').style.display = 'block';
+      }
+    }
+
+    // Load latest posts
+    loadPosts();
+  }
+
+  async function loadPosts() {
+    const grid = document.getElementById('posts-grid');
+    const { data: posts, error } = await sb
+      .from('posts')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(3);
+
+    if (error || !posts || posts.length === 0) {
+      grid.innerHTML = '<p style="color:#444;font-size:0.85rem">No updates yet. Check back soon.</p>';
+      return;
+    }
+
+    grid.innerHTML = posts.map(p => {
+      const date = new Date(p.created_at).toLocaleDateString('en-US', {
+        year: 'numeric', month: 'long', day: 'numeric'
+      });
+      const isVideo = p.type === 'video' || /\.(mp4|mov|webm)$/i.test(p.media_url || '');
+      const mediaHTML = p.media_url && !isVideo
+        ? `<img src="${p.media_url}" alt="${p.title}" />`
+        : '';
+
+      return `
+        <div class="post-card" onclick="window.location.href='/blog.html'">
+          <div class="badge">${p.type}</div>
+          <h3>${p.title}</h3>
+          ${p.body ? `<p>${p.body.substring(0, 100)}${p.body.length > 100 ? '...' : ''}</p>` : ''}
+          ${mediaHTML}
+          <div class="date">${date}</div>
         </div>
-        <nav>
-            <a href="#about">Our Mission</a>
-            <a href="#focus">Focus Areas</a>
-            <a href="#contact">Contact</a>
-        </nav>
-    </header>
+      `;
+    }).join('');
+  }
 
-    <!-- Main Hero Banner -->
-    <section class="hero">
-        <h1>Fighting for Justice in Georgia</h1>
-    
-        <p style="color:#fff; margin-bottom:1.5rem;">Advancing civil rights, systemic reform, and equal justice under the law for all Georgians.</p>
-<div style="display:flex; flex-direction:column; align-items:center; gap:1rem; width:100%; max-width:300px; margin:0 auto;">
-  <a href="https://power-action-comm.onrender.com/signup.html" class="cta-btn" style="width:100%; text-align:center;">Create Account</a>
-  <a href="https://power-action-comm.onrender.com/login.html" class="cta-btn" style="width:100%; text-align:center; background:#000; color:#D4AF37; border:2px solid #D4AF37;">Sign In</a>
-</div>
-    </section>
-
-    <!-- Core Focus Areas (Using your remaining 2 images) -->
-    <section class="gallery-section" id="focus">
-        <h2>Our Core Focus</h2>
-        <div class="grid">
-            
-            <!-- Card 1 -->
-            <div class="card">
-                <!-- Replace with your ImgBB Image 2 Direct Link -->
-                <img src="https://i.ibb.co/tTVZQWmz/FB-IMG-1782436384142.jpg" alt="Legal Advocacy">
-                <div class="card-content">
-                    <h3>Legal Advocacy</h3>
-                    <p>Protecting the constitutional rights of individuals and fighting systemic bias within the Georgia justice system.</p>
-                </div>
-            </div>
-
-            <!-- Card 2 -->
-            <div class="card">
-                <!-- Replace with your ImgBB Image 3 Direct Link -->
-                <img src="https://i.ibb.co/04PccP6/FB-IMG-1782436375231.jpg" alt="Community Reform">
-                <div class="card-content">
-                    <h3>Community Policy Reform</h3>
-                    <p>Working directly with local policy makers to change unfair laws and promote accountability across the state.</p>
-                </div>
-            </div>
-
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer>
-        <p>&copy; 2026 Justice & Reform Georgia. All Rights Reserved.</p>
-    </footer>
+  init();
+</script>
 
 </body>
 </html>
