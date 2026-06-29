@@ -8,9 +8,12 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: Arial, sans-serif; background: #000; color: #fff; min-height: 100vh; }
-    header { background: #000; border-bottom: 2px solid #c9a84c; font-size: 1.2rem; display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; }
-    header h1 { color: #c9a84c; font-size: 1.2rem; }
-    button.logout { background: transparent; border: 1px solid #c9a84c; color: #c9a84c; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
+    header { background: #000; border-bottom: 2px solid #c9a84c; display: flex; justify-content: space-between; align-items: center; padding: 12px 1.5rem; }
+    header a.logo { display: flex; align-items: center; text-decoration: none; }
+    header a.logo img { height: 40px; width: auto; }
+    .header-right { display: flex; align-items: center; gap: 10px; }
+    button.logout { background: transparent; border: 1px solid #c9a84c; color: #c9a84c; padding: 6px 14px; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; }
+    .nav-btn { background: transparent; border: 1px solid #c9a84c; color: #c9a84c; padding: 6px 14px; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; text-decoration: none; display: inline-block; }
     .hero { text-align: center; padding: 3rem 1rem 1rem; }
     .hero h2 { color: #c9a84c; font-size: 2rem; margin-bottom: 0.5rem; }
     .hero p { color: #ccc; font-size: 1rem; }
@@ -29,8 +32,13 @@
 <body>
 
   <header>
-    <h1>⚖️ Power Action Comm</h1>
-    <button class="logout" onclick="logout()">Log Out</button>
+    <a class="logo" href="/index.html">
+      <img src="https://i.ibb.co/ZpCgNvdM/download.webp" alt="PAC Logo" />
+    </a>
+    <div class="header-right">
+      <a class="nav-btn" href="/index.html">← Home</a>
+      <button class="logout" onclick="logout()">Log Out</button>
+    </div>
   </header>
 
   <div class="hero">
