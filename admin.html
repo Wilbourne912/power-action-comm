@@ -18,28 +18,40 @@
     header {
       background: #000;
       border-bottom: 2px solid #C9A84C;
-      padding: 16px 20px;
+      padding: 12px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
-    header h1 {
-      color: #C9A84C;
-      font-size: 1.1rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
+    header a.logo {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
     }
 
-    #logout-btn {
+    header a.logo img {
+      height: 40px;
+      width: auto;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-btn {
       background: transparent;
       border: 1px solid #C9A84C;
       color: #C9A84C;
       padding: 6px 14px;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       letter-spacing: 0.08em;
       text-transform: uppercase;
       cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
     }
 
     #auth-check {
@@ -217,8 +229,13 @@
 <body>
 
 <header>
-  <h1>PAC Admin</h1>
-  <button id="logout-btn" onclick="logout()">Sign Out</button>
+  <a class="logo" href="/index.html">
+    <img src="https://i.ibb.co/ZpCgNvdM/download.webp" alt="PAC Logo" />
+  </a>
+  <div class="header-right">
+    <a class="nav-btn" href="/dashboard.html">← Dashboard</a>
+    <button class="nav-btn" onclick="logout()">Sign Out</button>
+  </div>
 </header>
 
 <div id="auth-check">Verifying access...</div>
@@ -390,5 +407,4 @@
 </script>
 
 </body>
-    </html>
-    
+</html>
