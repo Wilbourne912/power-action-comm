@@ -18,18 +18,34 @@
     header {
       background: #000;
       border-bottom: 2px solid #C9A84C;
-      padding: 16px 20px;
+      padding: 12px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
-    header a {
-      color: #C9A84C;
+    header a.logo {
+      display: flex;
+      align-items: center;
       text-decoration: none;
-      font-size: 0.8rem;
+    }
+
+    header a.logo img {
+      height: 40px;
+      width: auto;
+    }
+
+    .nav-btn {
+      background: transparent;
+      border: 1px solid #C9A84C;
+      color: #C9A84C;
+      padding: 6px 14px;
+      font-size: 0.75rem;
       letter-spacing: 0.08em;
       text-transform: uppercase;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
     }
 
     header h1 {
@@ -137,9 +153,11 @@
 <body>
 
 <header>
-  <a href="/index.html">← Back to Site</a>
+  <a class="logo" href="/index.html">
+    <img src="https://i.ibb.co/ZpCgNvdM/download.webp" alt="PAC Logo" />
+  </a>
   <h1>Updates</h1>
-  <span style="width:80px"></span>
+  <a class="nav-btn" href="/dashboard.html">← Dashboard</a>
 </header>
 
 <div class="page-intro">
