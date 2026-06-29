@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Blog — Power Action Committee</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #000;
+      color: #fff;
+      font-family: 'Georgia', serif;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #000;
+      border-bottom: 2px solid #C9A84C;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header a {
+      color: #C9A84C;
+      text-decoration: none;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    header h1 {
+      color: #C9A84C;
+      font-size: 1.1rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .page-intro {
+      padding: 32px 20px 16px;
+      max-width: 680px;
+      margin: 0 auto;
+      border-bottom: 1px solid #1a1a1a;
+    }
+
+    .page-intro p {
+      color: #888;
+      font-size: 0.85rem;
+      letter-spacing: 0.04em;
+    }
+
+    #posts-container {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 24px 20px 60px;
+    }
+
+    .post-card {
+      border-bottom: 1px solid #1a1a1a;
+      padding: 24px 0;
+    }
+
+    .post-card:last-child {
+      border-bottom: none;
+    }
+
+    .post-meta {
+      font-size: 0.7rem;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 8px;
+    }
+
+    .post-type-badge {
+      color: #C9A84C;
+      margin-right: 8px;
+    }
+
+    .post-card h2 {
+      color: #fff;
+      font-size: 1.15rem;
+      line-height: 1.4;
+      margin-bottom: 10px;
+    }
+
+    .post-card p {
+      color: #aaa;
+      font-size: 0.9rem;
+      line-height: 1.7;
+      margin-bottom: 14px;
+    }
+
+    .post-card img {
+      width: 100%;
+      max-height: 320px;
+      object-fit: cover;
+      border-left: 3px solid #C9A84C;
+      margin-top: 10px;
+    }
+
+    .post-card video {
+      width: 100%;
+      margin-top: 10px;
+      border-left: 3px solid #C9A84C;
+    }
+
+    #loading {
+      text-align: center;
+      padding: 60px 20px;
+      color: #555;
+      font-size: 0.85rem;
+      letter-spacing: 0.05em;
+    }
+
+    #empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: #444;
+      font-size: 0.9rem;
+    }
+
+    footer {
+      border-top: 1px solid #1a1a1a;
+      text-align: center;
+      padding: 20px;
+      color: #333;
+      font-size: 0.75rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="/index.html">← Back to Site</a>
+  <h1>Updates</h1>
+  <span style="width:80px"></span>
+</header>
+
+<div class="page-intro">
+  <p>News, announcements, and updates from the Power Action Committee.</p>
+</div>
+
+<div id="posts-container">
+  <div id="loading">Loading posts...</div>
+</div>
+
+<footer>Power Action Committee &nbsp;·&nbsp; Georgia</footer>
+
+<script>
+  const SUPABASE_URL = 'https://anhhyowtlagqkzkctsfc.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_-k5_rZOUq-Jioz_KZdxhCg_dEzKUOoz';
+  const { createClient } = supabase;
+  const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  async function loadPosts() {
+    const container = document.getElementById('posts-container');
+    const { data: posts, error } = await sb
+      .from('posts')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error || !posts || posts.length === 0) {
+      container.innerHTML = '<div id="empty">No posts yet. Check back soon.</div>';
+      return;
+    }
+
+    container.innerHTML = posts.map(p => {
+      const date = new Date(p.created_at).toLocaleDateString('en-US', {
+        year: 'numeric', month: 'long', day: 'numeric'
+      });
+
+      let mediaHTML = '';
+      if (p.media_url) {
+        const isVideo = p.type === 'video' || /\.(mp4|mov|webm)$/i.test(p.media_url);
+        mediaHTML = isVideo
+          ? `<video controls src="${p.media_url}"></video>`
+          : `<img src="${p.media_url}" alt="${p.title}" />`;
+      }
+
+      return `
+        <div class="post-card">
+          <div class="post-meta">
+            <span class="post-type-badge">${p.type.toUpperCase()}</span>
+            ${date}
+          </div>
+          <h2>${p.title}</h2>
+          ${p.body ? `<p>${p.body}</p>` : ''}
+          ${mediaHTML}
+        </div>
+      `;
+    }).join('');
+  }
+
+  loadPosts();
+</script>
+
+</body>
+</html>
