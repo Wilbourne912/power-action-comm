@@ -424,8 +424,8 @@
 
 <!-- HERO -->
 <section class="hero">
-  <h1>Fighting for Justice in Georgia</h1>
-  <p>Advancing civil rights, systemic reform, and equal justice under the law for all Georgians.</p>
+  <h1 id="hero-title">Fighting for Justice in Georgia</h1>
+  <p id="hero-subtitle">Advancing civil rights, systemic reform, and equal justice under the law for all Georgians.</p>
   <div class="hero-btns" id="hero-btns">
     <a href="/signup.html" class="cta-btn">Create Account</a>
     <a href="/login.html" class="cta-btn outline">Sign In</a>
@@ -434,8 +434,8 @@
 
 <!-- ABOUT -->
 <section id="about">
-  <h2>Our Mission</h2>
-  <p>The Power Action Committee is a Georgia-based nonprofit civil rights organization dedicated to advancing equal justice, systemic reform, and community empowerment. We fight for the rights of all Georgians through advocacy, organizing, and direct action.</p>
+  <h2 id="about-title">Our Mission</h2>
+  <p id="about-text">The Power Action Committee is a Georgia-based nonprofit civil rights organization dedicated to advancing equal justice, systemic reform, and community empowerment. We fight for the rights of all Georgians through advocacy, organizing, and direct action.</p>
 </section>
 
 <!-- LATEST POSTS -->
@@ -450,21 +450,8 @@
 <!-- FOCUS AREAS -->
 <section class="gallery-section" id="focus">
   <h2>Our Core Focus</h2>
-  <div class="grid">
-    <div class="card">
-      <img src="https://anhhyowtlagqkzkctsfc.supabase.co/storage/v1/object/public/media/FB_IMG_1782436384142.jpg" alt="Legal Advocacy" />
-      <div class="card-content">
-        <h3>Legal Advocacy</h3>
-        <p>Protecting the constitutional rights of individuals and fighting systemic bias within the Georgia justice system.</p>
-      </div>
-    </div>
-    <div class="card">
-      <img src="https://anhhyowtlagqkzkctsfc.supabase.co/storage/v1/object/public/media/FB_IMG_1782436375231.jpg" alt="Community Reform" />
-      <div class="card-content">
-        <h3>Community Policy Reform</h3>
-        <p>Working directly with local policy makers to change unfair laws and promote accountability across the state.</p>
-      </div>
-    </div>
+  <div class="grid" id="focus-grid">
+    <!-- Loaded dynamically -->
   </div>
 </section>
 
@@ -472,7 +459,7 @@
 <section id="contact">
   <h2>Contact Us</h2>
   <p>Have questions or want to get involved? Reach out to the Power Action Committee.</p>
-  <p><a href="mailto:info@poweractioncommittee.org">info@poweractioncommittee.org</a></p>
+  <p><a id="contact-link" href="mailto:info@poweractioncommittee.org">info@poweractioncommittee.org</a></p>
 </section>
 
 <!-- FOOTER -->
@@ -505,6 +492,37 @@
   }
 
   async function init() {
+    // Load site settings
+    const { data: settings } = await sb.from('site_settings').select('*');
+    if (settings) {
+      settings.forEach(s => {
+        if (s.key === 'hero_title') document.getElementById('hero-title').textContent = s.value;
+        if (s.key === 'hero_subtitle') document.getElementById('hero-subtitle').textContent = s.value;
+        if (s.key === 'about_title') document.getElementById('about-title').textContent = s.value;
+        if (s.key === 'about_text') document.getElementById('about-text').textContent = s.value;
+        if (s.key === 'contact_email') {
+          const link = document.getElementById('contact-link');
+          link.textContent = s.value;
+          link.href = 'mailto:' + s.value;
+        }
+      });
+    }
+
+    // Load focus cards
+    const { data: cards } = await sb.from('focus_cards').select('*').order('display_order');
+    const grid = document.getElementById('focus-grid');
+    if (cards && cards.length) {
+      grid.innerHTML = cards.map(c => `
+        <div class="card">
+          ${c.image_url ? `<img src="${c.image_url}" alt="${c.title}" />` : ''}
+          <div class="card-content">
+            <h3>${c.title}</h3>
+            <p>${c.description || ''}</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
     // Check session
     const { data: { user } } = await sb.auth.getUser();
 
