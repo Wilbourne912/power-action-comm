@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Find Your Elected Officials | Power Action Committee</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0a0a0a;
+    --black-soft: #141210;
+    --gold: #C9A84C;
+    --gold-bright: #D4AF37;
+    --cream: #F5F1E6;
+    --line: rgba(201, 168, 76, 0.28);
+    --muted: #a39a85;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--black);
+    color: var(--cream);
+    font-family: 'Source Sans 3', sans-serif;
+    line-height: 1.5;
+  }
+
+  h1, h2, h3, .display {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+
+  header {
+    padding: 28px 20px 20px;
+    text-align: center;
+    border-bottom: 1px solid var(--line);
+  }
+
+  header img {
+    height: 56px;
+    margin-bottom: 14px;
+  }
+
+  header h1 {
+    font-size: 1.7rem;
+    margin: 0 0 6px;
+    color: var(--gold-bright);
+  }
+
+  header p {
+    color: var(--muted);
+    margin: 0;
+    font-size: 0.95rem;
+  }
+
+  main {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 28px 18px 60px;
+  }
+
+  .search-box {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .search-box input {
+    flex: 1;
+    padding: 14px 16px;
+    background: var(--black-soft);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    color: var(--cream);
+    font-size: 1rem;
+    font-family: inherit;
+  }
+
+  .search-box input:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.15);
+  }
+
+  .search-box button {
+    padding: 14px 22px;
+    background: var(--gold-bright);
+    color: var(--black);
+    border: none;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    font-family: 'Source Sans 3', sans-serif;
+    transition: background 0.15s ease;
+  }
+
+  .search-box button:hover { background: var(--gold); }
+  .search-box button:focus-visible,
+  .search-box input:focus-visible { outline: 2px solid var(--gold-bright); outline-offset: 2px; }
+
+  .hint {
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin: 0 0 36px;
+  }
+
+  .status {
+    text-align: center;
+    color: var(--muted);
+    padding: 40px 10px;
+    font-size: 0.95rem;
+  }
+
+  .status.error { color: #d98c6b; }
+
+  section.group {
+    margin-top: 38px;
+  }
+
+  .group-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  .group-header .rule {
+    flex: 1;
+    height: 0;
+    border-top: 1px solid var(--gold);
+    border-bottom: 1px solid var(--gold);
+    height: 3px;
+    opacity: 0.5;
+  }
+
+  .group-header h2 {
+    font-size: 1.05rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--gold-bright);
+    margin: 0;
+    white-space: nowrap;
+  }
+
+  .card {
+    background: var(--black-soft);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 18px 20px;
+    margin-bottom: 14px;
+  }
+
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .card h3 {
+    font-size: 1.15rem;
+    margin: 0;
+    color: var(--cream);
+  }
+
+  .card .badge {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--gold-bright);
+    border: 1px solid var(--gold);
+    border-radius: 100px;
+    padding: 3px 10px;
+    white-space: nowrap;
+  }
+
+  .card .title {
+    color: var(--muted);
+    font-size: 0.95rem;
+    margin: 4px 0 12px;
+  }
+
+  .card .contact {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    font-size: 0.88rem;
+  }
+
+  .card .contact a {
+    color: var(--gold-bright);
+    text-decoration: none;
+  }
+
+  .card .contact a:hover { text-decoration: underline; }
+
+  footer {
+    text-align: center;
+    padding: 30px 20px;
+    color: var(--muted);
+    font-size: 0.8rem;
+    border-top: 1px solid var(--line);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <img src="https://i.ibb.co/ZpCgNvdM/download.webp" alt="Power Action Committee">
+  <h1>Find Your Elected Officials</h1>
+  <p>Enter your ZIP code to see who represents you locally and at the state level.</p>
+</header>
+
+<main>
+  <div class="search-box">
+    <input
+      type="text"
+      id="zipInput"
+      placeholder="Enter ZIP code"
+      inputmode="numeric"
+      maxlength="5"
+      aria-label="ZIP code"
+    >
+    <button id="searchBtn">Search</button>
+  </div>
+  <p class="hint">Example: 31313 for Liberty County</p>
+
+  <div id="results"></div>
+</main>
+
+<footer>
+  Power Action Committee &mdash; Georgia
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+<script>
+  const SUPABASE_URL = 'https://anhhyowtlagqkzkctsfc.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_-k5_rZOUq-Jioz_KZdxhCg_dEzKUOoz';
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const zipInput = document.getElementById('zipInput');
+  const searchBtn = document.getElementById('searchBtn');
+  const results = document.getElementById('results');
+
+  const LEVEL_LABELS = { city: 'City', county: 'County', state: 'State' };
+  const LEVEL_ORDER = ['city', 'county', 'state'];
+
+  function showStatus(message, isError = false) {
+    results.innerHTML = `<div class="status${isError ? ' error' : ''}">${message}</div>`;
+  }
+
+  function renderResults(officials) {
+    if (!officials.length) {
+      showStatus('No officials found for that ZIP code yet. Try another ZIP, or check back soon as we add more.');
+      return;
+    }
+
+    const grouped = {};
+    officials.forEach(o => {
+      if (!grouped[o.level]) grouped[o.level] = [];
+      grouped[o.level].push(o);
+    });
+
+    results.innerHTML = '';
+
+    LEVEL_ORDER.forEach(level => {
+      if (!grouped[level]) return;
+
+      const section = document.createElement('section');
+      section.className = 'group';
+
+      const header = document.createElement('div');
+      header.className = 'group-header';
+      header.innerHTML = `<h2>${LEVEL_LABELS[level]}</h2><div class="rule"></div>`;
+      section.appendChild(header);
+
+      grouped[level].forEach(o => {
+        const card = document.createElement('div');
+        card.className = 'card';
+
+        const contactBits = [];
+        if (o.phone) contactBits.push(`<a href="tel:${o.phone}">${o.phone}</a>`);
+        if (o.email) contactBits.push(`<a href="mailto:${o.email}">${o.email}</a>`);
+        if (o.website_url) contactBits.push(`<a href="${o.website_url}" target="_blank" rel="noopener">Website</a>`);
+
+        card.innerHTML = `
+          <div class="card-top">
+            <h3>${o.full_name}</h3>
+            ${o.party ? `<span class="badge">${o.party}</span>` : ''}
+          </div>
+          <div class="title">${o.office_title}${o.district ? ' &mdash; ' + o.district : ''}</div>
+          ${contactBits.length ? `<div class="contact">${contactBits.join('')}</div>` : ''}
+        `;
+        section.appendChild(card);
+      });
+
+      results.appendChild(section);
+    });
+  }
+
+  async function searchByZip() {
+    const zip = zipInput.value.trim();
+
+    if (!/^\d{5}$/.test(zip)) {
+      showStatus('Enter a valid 5-digit ZIP code.', true);
+      return;
+    }
+
+    showStatus('Searching…');
+
+    const { data, error } = await supabase
+      .from('officials')
+      .select('*')
+      .contains('zip_codes', [zip]);
+
+    if (error) {
+      console.error(error);
+      showStatus('Something went wrong loading officials. Please try again.', true);
+      return;
+    }
+
+    renderResults(data);
+  }
+
+  searchBtn.addEventListener('click', searchByZip);
+  zipInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') searchByZip();
+  });
+</script>
+
+</body>
+  </html>
+  
