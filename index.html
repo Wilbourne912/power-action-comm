@@ -50,6 +50,30 @@
 
     nav a:hover { color: #fff; }
 
+    .nav-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: #D4AF37;
+  font-size: 1.8rem;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  header { flex-wrap: wrap; padding: 1rem; }
+  .nav-toggle { display: block; }
+  .nav-wrap {
+    display: none;
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+    padding: 1rem 0 0 0;
+  }
+  .nav-wrap.nav-open { display: flex; }
+  nav { flex-direction: column; align-items: flex-start; gap: 15px; }
+}
+
 
 
     /* ── USER DROPDOWN ── */
@@ -396,40 +420,41 @@
     <img src="https://i.ibb.co/ZpCgNvdM/download.webp" alt="Civil Rights Org Logo" />
   </a>
 
-    <button class="nav-toggle" onclick="document.querySelector('nav').classList.toggle('nav-open')">☰</button>
-<nav>
-  
-  <nav>
-    <a href="bills.html">Search Bills & Policies</a>
-    <a href="#about">Our Mission</a>
-    <a href="#focus">Focus Areas</a>
-    <a href="#contact">Contact</a>
-  </nav>
+  <button class="nav-toggle" onclick="document.querySelector('.nav-wrap').classList.toggle('nav-open')">☰</button>
 
-  <!-- Guest buttons (shown by default, hidden when logged in) -->
-  <div class="auth-btns" id="guest-btns">
-    
-    <a href="/signup.html" class="btn-solid">Join</a>
-    <a href="/login.html" class="btn-outline">Sign In</a>
-  </div>
-
-  <!-- User dropdown (hidden by default, shown when logged in) -->
-  <div class="user-menu" id="user-menu" style="display:none">
-    <button class="user-trigger" id="user-trigger" onclick="toggleDropdown()">
-      <span id="header-name">Member</span>
-      <span class="arrow">▼</span>
-    </button>
-    <div class="dropdown" id="dropdown">
+  <div class="nav-wrap">
+    <nav>
       <a href="bills.html">Search Bills & Policies</a>
-      <a href="officials.html">Find Your Officials</a>
-      <a href="/dashboard.html">Dashboard</a>
-      <a href="/blog.html">Updates</a>
-      <a href="/dashboard.html#dues">Pay Dues</a>
-      <a href="/admin.html" id="admin-link" style="display:none" class="admin-link">⚙ Admin Panel</a>
-      <button onclick="logout()">Sign Out</button>
+      <a href="#about">Our Mission</a>
+      <a href="#focus">Focus Areas</a>
+      <a href="#contact">Contact</a>
+    </nav>
+
+    <!-- Guest buttons (shown by default, hidden when logged in) -->
+    <div class="auth-btns" id="guest-btns">
+      <a href="/signup.html" class="btn-solid">Join</a>
+      <a href="/login.html" class="btn-outline">Sign In</a>
+    </div>
+
+    <div class="user-menu" id="user-menu" style="display:none">
+  <button class="user-trigger" id="user-trigger" onclick="toggleDropdown()">
+    <span id="header-name">Member</span>
+    <span class="arrow">▼</span>
+  </button>
+  <div class="dropdown" id="dropdown">
+    <a href="bills.html">Search Bills & Policies</a>
+    <a href="officials.html">Find Your Officials</a>
+    <a href="/dashboard.html">Dashboard</a>
+    <a href="/blog.html">Updates</a>
+    <a href="/dashboard.html#dues">Pay Dues</a>
+    <a href="/admin.html" id="admin-link" style="display:none">Admin</a>
+    <button onclick="logout()">Sign Out</button>
+  </div>
     </div>
   </div>
 </header>
+  
+
 
 <!-- HERO -->
 <section class="hero">
