@@ -25,6 +25,7 @@
     <button onclick="login()">Log In</button>
     <div id="msg"></div>
     <div class="link"><a href="/signup.html">No account? Sign up</a></div>
+    <button onclick="signInWithGoogle()" style="background:#fff; color:#111; margin-top:0.5rem;">Sign in with Google</button>
   </div>
 
   <script>
@@ -32,6 +33,17 @@
       'https://anhhyowtlagqkzkctsfc.supabase.co',
       'sb_publishable_-k5_rZOUq-Jioz_KZdxhCg_dEzKUOoz'
     );
+
+     async function signInWithGoogle() {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.origin + '/auth-callback.html' }
+      });
+      if (error) {
+        document.getElementById('msg').style.color = 'red';
+        document.getElementById('msg').textContent = error.message;
+      }
+     }
 
     async function login() {
       const email = document.getElementById('email').value;
