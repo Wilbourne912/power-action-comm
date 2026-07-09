@@ -581,20 +581,7 @@ footer a:hover {
       });
     }
 
-    // Load focus cards
-    const { data: cards } = await sb.from('focus_cards').select('*').order('display_order');
-    const grid = document.getElementById('focus-grid');
-    if (cards && cards.length) {
-      grid.innerHTML = cards.map(c => `
-        <div class="card">
-          ${c.image_url ? `<img src="${c.image_url}" alt="${c.title}" />` : ''}
-          <div class="card-content">
-            <h3>${c.title}</h3>
-            <p>${c.description || ''}</p>
-          </div>
-        </div>
-      `).join('');
-    }
+
 
     // Check session
     const { data: { user } } = await sb.auth.getUser();
