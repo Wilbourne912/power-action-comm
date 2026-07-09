@@ -382,14 +382,6 @@
 
     .card p { color: #aaa; font-size: 0.9rem; margin-bottom: 1rem; }
 
-    
-    
-  }
-}
-  
-   
-
-
     /* ── CONTACT ── */
     #contact {
       padding: 4rem 2rem;
@@ -498,8 +490,8 @@ footer a:hover {
 
 <!-- ABOUT -->
 <section id="about">
-  <h2 id="about-title">Who We Are</h2>
-  <p id="about-text">The Power of The People Action Committee is a Georgia-based nonprofit civil rights organization dedicated to advancing equal justice, systemic reform, and community empowerment. We fight for the rights of all Georgians through advocacy, organizing, and direct action.</p>
+  <h2 id="about-title">Our Mission</h2>
+  <p id="about-text">The Power Action Committee is a Georgia-based nonprofit civil rights organization dedicated to advancing equal justice, systemic reform, and community empowerment. We fight for the rights of all Georgians through advocacy, organizing, and direct action.</p>
 </section>
 
 <!-- LATEST POSTS -->
@@ -520,9 +512,14 @@ footer a:hover {
     data-show-text="false">
   </div>
 </section>
-
   
-
+<!-- FOCUS AREAS -->
+<section class="gallery-section" id="focus">
+  <h2>Our Core Focus</h2>
+  <div class="grid" id="focus-grid">
+    <!-- Loaded dynamically -->
+  </div>
+</section>
 
 <!-- CONTACT -->
 <section id="contact">
@@ -581,7 +578,20 @@ footer a:hover {
       });
     }
 
-
+    // Load focus cards
+    const { data: cards } = await sb.from('focus_cards').select('*').order('display_order');
+    const grid = document.getElementById('focus-grid');
+    if (cards && cards.length) {
+      grid.innerHTML = cards.map(c => `
+        <div class="card">
+          ${c.image_url ? `<img src="${c.image_url}" alt="${c.title}" />` : ''}
+          <div class="card-content">
+            <h3>${c.title}</h3>
+            <p>${c.description || ''}</p>
+          </div>
+        </div>
+      `).join('');
+    }
 
     // Check session
     const { data: { user } } = await sb.auth.getUser();
