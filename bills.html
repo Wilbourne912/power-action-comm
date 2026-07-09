@@ -193,21 +193,23 @@
   }
 
   async function searchTopic(subject) {
-    showStatus('Searching…');
+  showStatus('Searching…');
 
-    const url = `${API_BASE}/bills?jurisdiction=Georgia&subject=${encodeURIComponent(subject)}&sort=updated_desc&per_page=15&apikey=${OPENSTATES_KEY}`;
+  const url = `${API_BASE}/bills?jurisdiction=Georgia&q=${encodeURIComponent(subject)}&sort=latest_action_desc&per_page=10&apikey=${OPENSTATES_KEY}`;
 
-    try {
-      const res = await fetch(url);
-      if (!res.ok) {
-        throw new Error(`Request failed: ${res.status}`);
-      }
-      const data = await res.json();
-      renderBills(data.results || []);
-    } catch (err) {
-      console.error(err);
-      showStatus('Could not load bills right now. Please try again shortly.', true);
+  try {
+    const res = await fetch(url, {
+      headers: { 'X-API-KEY': OPENSTATES_KEY }
+    });
+    if (!res.ok) {
+      throw new Error(`Request failed: ${res.status}`);
     }
+    const data = await res.json();
+    renderBills(data.results || []);
+  } catch (err) {
+    console.error(err);
+    showStatus('Could not load bills right now. Please try again shortly.', true);
+  }
   }
 
   grid.addEventListener('click', e => {
