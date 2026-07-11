@@ -20,6 +20,16 @@
     <input type="text" id="name" placeholder="Full Name" />
     <input type="email" id="email" placeholder="Email" />
     <input type="password" id="password" placeholder="Password" />
+    <input type="password" id="password" placeholder="Password" />
+    <div style="text-align:left; margin-bottom:1rem; font-size:0.85rem;">
+      <label style="display:block; margin-bottom:0.3rem;">
+          <input type="radio" name="role" value="member" checked /> Member
+            </label>
+              <label style="display:block;">
+                  <input type="radio" name="role" value="contributor" /> Contributor (can post & comment)
+                    </label>
+                    </div>
+                    <button onclick="signUp()">Create Account</button>
     <button onclick="signUp()">Create Account</button>
     <div id="msg"></div>
   </div>
@@ -44,15 +54,16 @@
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
     const msg = document.getElementById('msg');
-
+    const role = document.querySelector('input[name="role"]:checked').value;
+     
     msg.style.color = 'yellow';
     msg.textContent = 'Trying...';
 
-    try {
+    try 
       const { data, error } = await supabase.auth.signUp({
-        email, password,
-        options: { data: { full_name: name } }
-      });
+      	  email, password,
+      	    options: { data: { full_name: name, role: role } }
+      	    });
 
       if (error) {
         msg.style.color = 'red';
@@ -69,3 +80,4 @@
   </script>
 </body>
 </html>
+1
