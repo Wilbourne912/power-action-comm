@@ -153,6 +153,7 @@ async function initAuth() {
       .single();
 
     currentRole = memberRow ? memberRow.role : "member";
+    alert("User: " + (user ? user.email : "none") + " | Role: " + currentRole);
     document.getElementById("user-role-badge").textContent =
       memberRow ? memberRow.full_name + " (" + currentRole + ")" : "";
 
