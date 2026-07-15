@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Forum | Justice & Reform Georgia</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+Pro:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --black: #0a0a0a;
+    --gold: #D4AF37;
+    --gray: #1c1c1c;
+    --text: #eaeaea;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--black);
+    color: var(--text);
+    font-family: 'Source Sans Pro', sans-serif;
+    margin: 0;
+    padding: 0 16px 60px;
+  }
+  h1, h2, h3 { font-family: 'Playfair Display', serif; color: var(--gold); }
+  .nav-wrap {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+    border-bottom: 1px solid #333;
+  }
+  #guest-btns, #user-menu { display: flex; gap: 10px; }
+  #user-menu { display: none; }
+  .btn {
+    background: var(--gold);
+    color: var(--black);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .btn-outline {
+    background: transparent;
+    color: var(--gold);
+    border: 1px solid var(--gold);
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .thread-card {
+    background: var(--gray);
+    border: 1px solid #2a2a2a;
+    border-radius: 6px;
+    padding: 14px;
+    margin-bottom: 12px;
+    cursor: pointer;
+  }
+  .thread-card.pinned { border-left: 3px solid var(--gold); }
+  .thread-meta { font-size: 0.85em; color: #999; margin-top: 6px; }
+  .comment {
+    background: var(--gray);
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 10px;
+  }
+  textarea, input[type="text"] {
+    width: 100%;
+    background: #141414;
+    color: var(--text);
+    border: 1px solid #333;
+    border-radius: 4px;
+    padding: 10px;
+    font-family: inherit;
+    margin-bottom: 10px;
+  }
+  #new-thread-form, #comment-form { display: none; margin-top: 20px; }
+  .back-link { color: var(--gold); cursor: pointer; display: inline-block; margin-bottom: 16px; }
+  .delete-btn {
+    background: transparent;
+    color: #c0392b;
+    border: 1px solid #c0392b;
+    border-radius: 4px;
+    padding: 4px 10px;
+    font-size: 0.8em;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+  #forum-list-view, #forum-thread-view { display: none; }
+</style>
+</head>
+<body>
+
+<div class="nav-wrap">
+  <h2 style="margin:0;">Forum</h2>
+  <div id="guest-btns">
+    <a class="btn" href="/login.html">Log In</a>
+  </div>
+  <div id="user-menu">
+    <span id="user-role-badge" style="color:#999; font-size:0.85em;"></span>
+  </div>
+</div>
+
+<div id="forum-list-view">
+  <button class="btn" id="show-new-thread-btn" style="display:none; margin-bottom:16px;">+ New Thread</button>
+
+  <div id="new-thread-form">
+    <input type="text" id="thread-title-input" placeholder="Thread title">
+    <textarea id="thread-body-input" rows="4" placeholder="What's on your mind?"></textarea>
+    <button class="btn" id="submit-thread-btn">Post Thread</button>
+    <button class="btn-outline" id="cancel-thread-btn">Cancel</button>
+  </div>
+
+  <div id="thread-list"><p style="color:#999;">Loading threads...</p></div>
+</div>
+
+<div id="forum-thread-view">
+  <span class="back-link" id="back-to-list">&larr; Back to all threads</span>
+  <div id="thread-detail"></div>
+  <h3>Replies</h3>
+  <div id="comment-list"></div>
+
+  <div id="comment-form">
+    <textarea id="comment-body-input" rows="3" placeholder="Write a reply..."></textarea>
+    <button class="btn" id="submit-comment-btn">Post Reply</button>
+  </div>
+  <p id="login-to-reply" style="color:#999; display:none;">Log in to join the discussion.</p>
+</div>
+
+<script>
+const SUPABASE_URL = "https://anhhyowtlagqkzkctsfc.supabase.co";
+const SUPABASE_KEY = "sb_publishable_-k5_rZOUq-Jioz_KZdxhCg_dEzKUOoz";
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null;
+let currentRole = null;
+let activeThreadId = null;
+
+async function initAuth() {
+  const { data: { user } } = await supabase.auth.getUser();
+  currentUser = user;
+
+  if (user) {
+    document.getElementById("guest-btns").style.display = "none";
+    document.getElementById("user-menu").style.display = "flex";
+
+    const { data: memberRow } = await supabase
+      .from("members")
+      .select("role, full_name")
+      .eq("id", user.id)
+      .single();
+
+    currentRole = memberRow ? memberRow.role : "member";
+    document.getElementById("user-role-badge").textContent =
+      memberRow ? memberRow.full_name + " (" + currentRole + ")" : "";
+
+    document.getElementById("show-new-thread-btn").style.display = "inline-block";
+    document.getElementById("comment-form").style.display = "block";
+    document.getElementById("login-to-reply").style.display = "none";
+  } else {
+    document.getElementById("comment-form").style.display = "none";
+    document.getElementById("login-to-reply").style.display = "block";
+  }
+}
+
+async function getAuthorNames(ids) {
+  const uniqueIds = [...new Set(ids)];
+  if (uniqueIds.length === 0) return {};
+  const { data } = await supabase
+    .from("members")
+    .select("id, full_name")
+    .in("id", uniqueIds);
+  const map = {};
+  (data || []).forEach(m => map[m.id] = m.full_name);
+  return map;
+}
+
+async function loadThreadList() {
+  document.getElementById("forum-thread-view").style.display = "none";
+  document.getElementById("forum-list-view").style.display = "block";
+  activeThreadId = null;
+
+  const { data: threads, error } = await supabase
+    .from("forum_threads")
+    .select("*")
+    .order("pinned", { ascending: false })
+    .order("created_at", { ascending: false });
+
+  const listEl = document.getElementById("thread-list");
+
+  if (error) {
+    listEl.innerHTML = "<p style='color:#c0392b;'>Error loading threads.</p>";
+    return;
+  }
+
+  if (!threads.length) {
+    listEl.innerHTML = "<p style='color:#999;'>No threads yet. Be the first to post.</p>";
+    return;
+  }
+
+  const authorMap = await getAuthorNames(threads.map(t => t.author_id));
+
+  listEl.innerHTML = threads.map(t => `
+    <div class="thread-card ${t.pinned ? "pinned" : ""}" onclick="openThread('${t.id}')">
+      <h3 style="margin:0 0 6px;">${escapeHtml(t.title)}${t.pinned ? " 📌" : ""}</h3>
+      <p style="margin:0; color:#ccc;">${escapeHtml(truncate(t.body, 120))}</p>
+      <div class="thread-meta">by ${escapeHtml(authorMap[t.author_id] || "Unknown")} · ${formatDate(t.created_at)}</div>
+    </div>
+  `).join("");
+}
+
+async function openThread(threadId) {
+  activeThreadId = threadId;
+  document.getElementById("forum-list-view").style.display = "none";
+  document.getElementById("forum-thread-view").style.display = "block";
+
+  const { data: thread, error } = await supabase
+    .from("forum_threads")
+    .select("*")
+    .eq("id", threadId)
+    .single();
+
+  if (error || !thread) {
+    document.getElementById("thread-detail").innerHTML = "<p style='color:#c0392b;'>Thread not found.</p>";
+    return;
+  }
+
+  const authorMap = await getAuthorNames([thread.author_id]);
+
+  let deleteThreadBtn = "";
+  if (currentRole === "admin") {
+    deleteThreadBtn = `<button class="delete-btn" onclick="deleteThread('${thread.id}')">Delete Thread</button>`;
+  }
+
+  document.getElementById("thread-detail").innerHTML = `
+    <h1>${escapeHtml(thread.title)}</h1>
+    <p>${escapeHtml(thread.body)}</p>
+    <div class="thread-meta">by ${escapeHtml(authorMap[thread.author_id] || "Unknown")} · ${formatDate(thread.created_at)}</div>
+    ${deleteThreadBtn}
+  `;
+
+  await loadComments(threadId);
+}
+
+async function loadComments(threadId) {
+  const { data: comments, error } = await supabase
+    .from("forum_comments")
+    .select("*")
+    .eq("thread_id", threadId)
+    .order("created_at", { ascending: true });
+
+  const listEl = document.getElementById("comment-list");
+
+  if (error) {
+    listEl.innerHTML = "<p style='color:#c0392b;'>Error loading replies.</p>";
+    return;
+  }
+
+  if (!comments.length) {
+    listEl.innerHTML = "<p style='color:#999;'>No replies yet.</p>";
+    return;
+  }
+
+  const authorMap = await getAuthorNames(comments.map(c => c.author_id));
+
+  listEl.innerHTML = comments.map(c => `
+    <div class="comment">
+      <p style="margin:0;">${escapeHtml(c.body)}</p>
+      <div class="thread-meta">${escapeHtml(authorMap[c.author_id] || "Unknown")} · ${formatDate(c.created_at)}</div>
+      ${currentRole === "admin" ? `<button class="delete-btn" onclick="deleteComment('${c.id}')">Delete</button>` : ""}
+    </div>
+  `).join("");
+}
+
+async function submitThread() {
+  const title = document.getElementById("thread-title-input").value.trim();
+  const body = document.getElementById("thread-body-input").value.trim();
+
+  if (!title || !body) {
+    alert("Please fill in both a title and body.");
+    return;
+  }
+
+  const { error } = await supabase.from("forum_threads").insert({
+    title: title,
+    body: body,
+    author_id:
