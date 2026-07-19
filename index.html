@@ -725,5 +725,203 @@ footer a:hover {
   init();
 </script>
 
+	<!-- PAC FAQ Widget: paste this block right before </body> on any page -->
+<style>
+  #pac-chat-launcher {
+    position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+    display: flex; align-items: center; gap: 8px;
+    background: #D4AF37; color: #0a0a0a; border: none; border-radius: 999px;
+    padding: 12px 20px; font-family: 'Source Sans Pro', Arial, sans-serif;
+    font-weight: 600; font-size: 0.95rem; cursor: pointer;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+  }
+  #pac-chat-panel {
+    position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+    width: 360px; max-width: 90vw; height: 520px; max-height: 80vh;
+    background: #0a0a0a; border: 1px solid #D4AF37; border-radius: 12px;
+    display: none; flex-direction: column; overflow: hidden;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+    font-family: 'Source Sans Pro', Arial, sans-serif;
+  }
+  #pac-chat-panel.open { display: flex; }
+  #pac-chat-header {
+    display: flex; align-items: center; justify-content: space-between;
+    background: #000; border-bottom: 1px solid #D4AF37; padding: 12px 16px;
+  }
+  #pac-chat-header span {
+    font-family: 'Playfair Display', serif; color: #fff; font-size: 1.05rem; font-weight: 700;
+  }
+  #pac-chat-close { background: none; border: none; color: #D4AF37; font-size: 1.2rem; cursor: pointer; }
+  #pac-chat-messages {
+    flex: 1; overflow-y: auto; padding: 12px 16px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .pac-msg {
+    max-width: 88%; padding: 8px 12px; border-radius: 10px;
+    font-size: 0.88rem; line-height: 1.45;
+  }
+  .pac-msg.user { align-self: flex-end; background: #D4AF37; color: #0a0a0a; }
+  .pac-msg.assistant { align-self: flex-start; background: #1c1c1c; color: #eee; }
+  .pac-msg.assistant a { color: #D4AF37; }
+  #pac-chat-suggestions {
+    display: flex; flex-wrap: wrap; gap: 6px; padding: 0 16px 10px 16px;
+  }
+  .pac-chip {
+    background: #1c1c1c; border: 1px solid #333; color: #ccc;
+    border-radius: 999px; padding: 5px 10px; font-size: 0.75rem;
+    cursor: pointer;
+  }
+  .pac-chip:hover { border-color: #D4AF37; color: #D4AF37; }
+  #pac-chat-inputrow {
+    display: flex; align-items: center; gap: 8px; padding: 12px;
+    border-top: 1px solid #333;
+  }
+  #pac-chat-input {
+    flex: 1; background: #1c1c1c; border: 1px solid #333; border-radius: 8px;
+    padding: 8px 10px; color: #fff; font-size: 0.85rem; outline: none;
+  }
+  #pac-chat-send {
+    background: #D4AF37; border: none; border-radius: 8px;
+    width: 36px; height: 36px; cursor: pointer; font-size: 1rem;
+  }
+</style>
+
+<button id="pac-chat-launcher" onclick="pacChatToggle(true)">💬 Ask PAC</button>
+
+<div id="pac-chat-panel">
+  <div id="pac-chat-header">
+    <span>Justice &amp; Reform GA</span>
+    <button id="pac-chat-close" onclick="pacChatToggle(false)">&times;</button>
+  </div>
+  <div id="pac-chat-messages"></div>
+  <div id="pac-chat-suggestions"></div>
+  <div id="pac-chat-inputrow">
+    <input id="pac-chat-input" type="text" placeholder="Ask a question..." />
+    <button id="pac-chat-send" onclick="pacChatSend()">➤</button>
+  </div>
+</div>
+
+<script>
+  // ---- Edit this block to match your actual pages/content ----
+  const PAC_FAQ = [
+    {
+      keywords: ["sign up", "signup", "create account", "register", "join"],
+      answer: "You can create an account on the Sign Up page — click 'Join Power Action' and fill in your name, email, and password.",
+      link: "signup.html", linkText: "Go to Sign Up"
+    },
+    {
+      keywords: ["login", "log in", "sign in"],
+      answer: "Head to the Login page and enter the email and password you signed up with.",
+      link: "login.html", linkText: "Go to Login"
+    },
+    {
+      keywords: ["bill", "bills", "legislation", "law"],
+      answer: "The Bills page tracks current Georgia legislation using live data from Open States, searchable by keyword.",
+      link: "bills.html", linkText: "View Bills"
+    },
+    {
+      keywords: ["rep", "reps", "representative", "official", "senator", "zip"],
+      answer: "The Officials page lets you look up your elected representatives by ZIP code, from city to federal level.",
+      link: "officials.html", linkText: "Find Your Reps"
+    },
+    {
+      keywords: ["forum", "discussion", "comment", "post", "thread"],
+      answer: "The Forum is where members discuss bills and civic topics. You'll need an account to post.",
+      link: "forum.html", linkText: "Visit Forum"
+    },
+    {
+      keywords: ["blog", "news", "article"],
+      answer: "The Blog has posts and updates from the PAC — anyone can read, admins publish.",
+      link: "blog.html", linkText: "Read Blog"
+    },
+    {
+      keywords: ["contributor", "role", "member vs contributor", "permission"],
+      answer: "Members can read and follow bills. Contributors can also post and comment in the forum and blog. You pick your role at signup.",
+    },
+    {
+      keywords: ["password", "requirement", "reset"],
+      answer: "Passwords need at least 8 characters, one uppercase letter, one lowercase letter, and one number. There's no password reset page yet — contact an admin if you're locked out.",
+    },
+    {
+      keywords: ["what is this", "what does this site do", "about", "mission", "purpose"],
+      answer: "Power Action Committee / Justice & Reform Georgia is a civic engagement platform — track state bills, find your representatives, and join the discussion.",
+    }
+  ];
+
+  const PAC_FALLBACK = "I'm not sure about that one yet — try asking about signing up, bills, your representatives, or the forum. You can also browse the site directly using the menu.";
+  const PAC_SUGGESTED_CHIPS = ["How do I sign up?", "Find my reps", "What's on the Bills page?", "What's the forum?"];
+  // ---------------------------------------------------------------
+
+  let pacChatStarted = false;
+
+  function pacChatToggle(open) {
+    document.getElementById('pac-chat-panel').classList.toggle('open', open);
+    if (open && !pacChatStarted) {
+      pacChatStarted = true;
+      pacChatRender('assistant', "Hi — I can point you to the right page or answer quick questions about how this site works. What do you need?");
+      pacChatRenderChips();
+    }
+  }
+
+  function pacChatRender(role, html) {
+    const el = document.createElement('div');
+    el.className = 'pac-msg ' + role;
+    el.innerHTML = html;
+    document.getElementById('pac-chat-messages').appendChild(el);
+    const container = document.getElementById('pac-chat-messages');
+    container.scrollTop = container.scrollHeight;
+  }
+
+  function pacChatRenderChips() {
+    const box = document.getElementById('pac-chat-suggestions');
+    box.innerHTML = '';
+    PAC_SUGGESTED_CHIPS.forEach(function(q) {
+      const chip = document.createElement('button');
+      chip.className = 'pac-chip';
+      chip.textContent = q;
+      chip.onclick = function() { pacChatAsk(q); };
+      box.appendChild(chip);
+    });
+  }
+
+  function pacChatAnswer(query) {
+    const q = query.toLowerCase();
+    for (const item of PAC_FAQ) {
+      if (item.keywords.some(function(k) { return q.includes(k); })) {
+        let html = escapeHtml(item.answer);
+        if (item.link) {
+          html += ' <a href="' + item.link + '">' + item.linkText + ' &rarr;</a>';
+        }
+        return html;
+      }
+    }
+    return escapeHtml(PAC_FALLBACK);
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function pacChatAsk(text) {
+    pacChatRender('user', escapeHtml(text));
+    pacChatRender('assistant', pacChatAnswer(text));
+  }
+
+  function pacChatSend() {
+    const input = document.getElementById('pac-chat-input');
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = '';
+    pacChatAsk(text);
+  }
+
+  document.getElementById('pac-chat-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') pacChatSend();
+  });
+</script>
+	
+
 </body>
 </html>
