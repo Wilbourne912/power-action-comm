@@ -253,6 +253,70 @@
     }
 
     .settings-row label { color: #777; margin-bottom: 4px; }
+
+    /* COMPLAINTS */
+    .complaint-card {
+      background: #111;
+      border-left: 3px solid #C9A84C;
+      margin-bottom: 12px;
+    }
+
+    .complaint-summary {
+      padding: 14px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .complaint-summary h3 { color: #fff; font-size: 0.9rem; margin-bottom: 4px; }
+    .complaint-summary p { color: #888; font-size: 0.78rem; }
+
+    .status-badge {
+      display: inline-block;
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 2px 8px;
+      margin-left: 8px;
+      border: 1px solid #555;
+      color: #ccc;
+      vertical-align: middle;
+    }
+
+    .status-badge.status-submitted { border-color: #C9A84C; color: #C9A84C; }
+    .status-badge.status-in_review { border-color: #5b8fd6; color: #5b8fd6; }
+    .status-badge.status-resolved { border-color: #5cb85c; color: #5cb85c; }
+    .status-badge.status-closed { border-color: #555; color: #777; }
+
+    .complaint-details {
+      display: none;
+      padding: 0 14px 16px;
+      border-top: 1px solid #1a1a1a;
+    }
+
+    .complaint-details.open { display: block; }
+
+    .detail-row { padding: 10px 0; border-bottom: 1px solid #1a1a1a; }
+    .detail-row .detail-label {
+      color: #C9A84C;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .detail-row .detail-value { color: #ddd; font-size: 0.88rem; white-space: pre-wrap; }
+    .detail-row .detail-value a { color: #C9A84C; }
+
+    .note-item {
+      background: #0a0a0a;
+      border-left: 2px solid #333;
+      padding: 8px 10px;
+      margin-bottom: 8px;
+    }
+    .note-item .note-meta { font-size: 0.68rem; color: #666; margin-bottom: 3px; }
+    .note-item .note-text { font-size: 0.85rem; color: #ddd; white-space: pre-wrap; }
   </style>
 </head>
 <body>
@@ -275,6 +339,7 @@
     <button class="tab-btn active" onclick="switchTab('posts')">Posts</button>
     <button class="tab-btn" onclick="switchTab('settings')">Site Settings</button>
     <button class="tab-btn" onclick="switchTab('cards')">Focus Cards</button>
+    <button class="tab-btn" onclick="switchTab('complaints')">Complaints</button>
   </div>
 
   <!-- POSTS TAB -->
@@ -378,6 +443,24 @@
     <div id="cards-list">Loading...</div>
   </div>
 
+  <!-- COMPLAINTS TAB -->
+  <div class="tab-content" id="tab-complaints">
+    <h2>Complaints</h2>
+
+    <div class="form-group">
+      <label>Filter by Status</label>
+      <select id="complaint-filter" onchange="loadComplaints()">
+        <option value="all">All</option>
+        <option value="submitted">Submitted</option>
+        <option value="in_review">In Review</option>
+        <option value="resolved">Resolved</option>
+        <option value="closed">Closed</option>
+      </select>
+    </div>
+
+    <div id="complaints-list">Loading...</div>
+  </div>
+
 </div>
 
 <script>
@@ -407,6 +490,7 @@
     loadPosts();
     loadSettings();
     loadCards();
+    loadComplaints();
   }
 
   async function logout() {
@@ -417,7 +501,7 @@
   // ── TABS ──
   function switchTab(tab) {
     document.querySelectorAll('.tab-btn').forEach((b, i) => {
-      b.classList.toggle('active', ['posts','settings','cards'][i] === tab);
+      b.classList.toggle('active', ['posts','settings','cards','complaints'][i] === tab);
     });
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
     document.getElementById('tab-' + tab).classList.add('active');
@@ -571,25 +655,4 @@
     if (!cards?.length) { list.innerHTML = '<p style="color:#555;font-size:0.85rem">No cards yet.</p>'; return; }
     list.innerHTML = cards.map(c => `
       <div class="focus-card-item">
-        ${c.image_url ? `<img src="${c.image_url}" alt="${c.title}" />` : '<div style="width:70px;height:60px;background:#222;flex-shrink:0"></div>'}
-        <div class="focus-card-info">
-          <h3>${c.title}</h3>
-          <p>${c.description || ''}</p>
-          <button class="btn-danger" style="margin-top:8px" onclick="deleteCard('${c.id}')">Delete</button>
-        </div>
-      </div>
-    `).join('');
-  }
-
-  async function deleteCard(id) {
-    if (!confirm('Delete this card?')) return;
-    await sb.from('focus_cards').delete().eq('id', id);
-    loadCards();
-  }
-
-  init();
-</script>
-
-</body>
-  </html>
-  
+   
