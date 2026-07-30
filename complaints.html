@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>File a Complaint | Justice & Reform Georgia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --black:#000;
+    --black-2:#0a0a0a;
+    --gold:#D4AF37;
+    --gold-dim:#8a742a;
+    --paper:#f7f5f1;
+    --line:#2a2a2a;
+    --error:#c0392b;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--black);
+    color:var(--paper);
+    font-family:'Source Sans 3', sans-serif;
+    line-height:1.5;
+  }
+  .wrap{
+    max-width:640px;
+    margin:0 auto;
+    padding:32px 20px 80px;
+  }
+  header.page-head{
+    border-bottom:1px solid var(--gold-dim);
+    padding-bottom:16px;
+    margin-bottom:28px;
+  }
+  header.page-head .eyebrow{
+    color:var(--gold);
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    font-size:.75rem;
+    font-weight:600;
+  }
+  h1{
+    font-family:'Playfair Display', serif;
+    font-size:1.9rem;
+    margin:6px 0 0;
+    color:#fff;
+  }
+  .subtext{
+    color:#b9b6ae;
+    font-size:.95rem;
+    margin-top:8px;
+  }
+  fieldset{
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:18px 18px 22px;
+    margin:0 0 20px;
+  }
+  legend{
+    font-family:'Playfair Display', serif;
+    color:var(--gold);
+    padding:0 8px;
+    font-size:1.05rem;
+  }
+  label{
+    display:block;
+    font-weight:600;
+    font-size:.92rem;
+    margin:14px 0 6px;
+    color:#e9e6df;
+  }
+  label .req{ color:var(--gold); margin-left:2px; }
+  .field-hint{
+    font-size:.8rem;
+    color:#8f8c85;
+    margin-top:-2px;
+    margin-bottom:6px;
+  }
+  select, input[type=text], input[type=date], input[type=file], textarea{
+    width:100%;
+    background:var(--black-2);
+    border:1px solid var(--line);
+    color:#fff;
+    border-radius:5px;
+    padding:11px 12px;
+    font-size:1rem;
+    font-family:inherit;
+  }
+  select:focus, input:focus, textarea:focus{
+    outline:2px solid var(--gold);
+    outline-offset:1px;
+    border-color:var(--gold);
+  }
+  textarea{ resize:vertical; min-height:120px; }
+  .row-with-help{
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .row-with-help select{ flex:1; }
+  .help-btn{
+    flex:0 0 auto;
+    width:26px; height:26px;
+    border-radius:50%;
+    border:1px solid var(--gold-dim);
+    background:transparent;
+    color:var(--gold);
+    font-weight:700;
+    font-size:.85rem;
+    cursor:pointer;
+    line-height:1;
+  }
+  .help-btn:hover, .help-btn:focus{ background:var(--gold); color:#000; }
+  .help-text{
+    display:none;
+    font-size:.85rem;
+    color:#cfcbc0;
+    background:var(--black-2);
+    border-left:2px solid var(--gold);
+    padding:8px 12px;
+    margin-top:8px;
+    border-radius:0 4px 4px 0;
+  }
+  .help-text.open{ display:block; }
+  .word-counter{
+    text-align:right;
+    font-size:.78rem;
+    color:#8f8c85;
+    margin-top:4px;
+  }
+  .word-counter.over{ color:var(--error); }
+  .myself-fields{ display:none; }
+  .myself-fields.show{ display:block; }
+  .conditional-field{ display:none; }
+  .conditional-field.show{ display:block; }
+  .attest-row{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    margin-top:14px;
+  }
+  .attest-row input[type=checkbox]{
+    margin-top:5px;
+    width:18px; height:18px;
+    accent-color:var(--gold);
+    flex:0 0 auto;
+  }
+  .attest-row label{
+    margin:0;
+    font-weight:400;
+    color:#e9e6df;
+    font-size:.92rem;
+  }
+  .attest-row input[type=text]{
+    display:inline-block;
+    width:auto;
+    min-width:160px;
+    padding:4px 8px;
+    margin:0 4px;
+    vertical-align:middle;
+  }
+  .sign-label{
+    display:block;
+    text-align:center;
+    font-size:.78rem;
+    color:#8f8c85;
+    margin-top:4px;
+  }
+  .thank-you{
+    display:none;
+    text-align:center;
+    padding:40px 16px;
+  }
+  .thank-you.show{ display:block; }
+  .thank-you h2{
+    font-family:'Playfair Display', serif;
+    color:#fff;
+    font-size:1.5rem;
+    margin-bottom:10px;
+  }
+  .thank-you p{ color:#cfcbc0; }
+  .site-footer{
+    margin-top:36px;
+    padding-top:16px;
+    border-top:1px solid var(--line);
+    font-size:.8rem;
+    color:#8f8c85;
+    text-align:center;
+  }
+  .site-footer a{
+    color:var(--gold);
+    text-decoration:none;
+  }
+  .site-footer a:hover{ text-decoration:underline; }
+  .site-footer .policy-note{
+    margin-top:6px;
+    color:#77746c;
+  }
+  button.submit{
+    width:100%;
+    background:var(--gold);
+    color:#000;
+    border:none;
+    border-radius:6px;
+    padding:14px;
+    font-size:1rem;
+    font-weight:700;
+    cursor:pointer;
+    margin-top:8px;
+  }
+  button.submit:disabled{ opacity:.5; cursor:not-allowed; }
+  button.submit:hover:not(:disabled){ background:#e6c455; }
+  #formStatus{
+    margin-top:14px;
+    font-size:.9rem;
+  }
+  #formStatus.error{ color:var(--error); }
+  #formStatus.success{ color:#7bbf6a; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="page-head">
+    <div class="eyebrow">Justice &amp; Reform Georgia · PAC Outreach</div>
+    <h1>File a Complaint</h1>
+    <p class="subtext">Tell us who this is about and who's filing it. Fields marked <span style="color:var(--gold)">*</span> are required.</p>
+  </header>
+
+  <form id="complaintForm" novalidate>
+
+    <fieldset>
+      <legend>Complaint against</legend>
+      <div class="row-with-help">
+        <select id="complaintAgainst" required>
+          <option value="" disabled selected>Select one</option>
+          <option value="official">Official</option>
+          <option value="prison_jail">Prison / Jail</option>
+        </select>
+        <button type="button" class="help-btn" data-target="help-against" aria-label="What does this mean?">?</button>
+      </div>
+      <div class="help-text" id="help-against">
+        Choose "Official" if this complaint is about a public official, staff member, or business contact. Choose "Prison / Jail" if it's about a specific facility.
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>I am complaining on behalf of</legend>
+      <div class="row-with-help">
+        <select id="onBehalfOf" required>
+          <option value="" disabled selected>Select one</option>
+          <option value="myself">Myself</option>
+          <option value="another">Another person</option>
+          <option value="incarcerated_person">An incarcerated person</option>
+        </select>
+        <button type="button" class="help-btn" data-target="help-behalf" aria-label="What does this mean?">?</button>
+      </div>
+      <div class="help-text" id="help-behalf">
+        Select who this complaint is being filed for. If it's not you, we'll ask a few extra questions to make sure we can follow up appropriately.
+      </div>
+    </fieldset>
+
+    <div class="myself-fields" id="myselfFields">
+      <fieldset>
+        <legend>Your information</legend>
+
+        <div class="conditional-field" id="filingForFieldWrap">
+          <label for="fFilingFor">Name of person you're filing for<span class="req">*</span></label>
+          <input type="text" id="fFilingFor" name="fFilingFor">
+        </div>
+
+        <div class="conditional-field" id="gdcFieldWrap">
+          <label for="fGdcNumber">GDC #<span class="req">*</span></label>
+          <input type="text" id="fGdcNumber" name="fGdcNumber" inputmode="numeric">
+        </div>
+
+        <label for="fName">Name<span class="req">*</span></label>
+        <input type="text" id="fName" name="fName" autocomplete="name">
+
+        <label for="fAddress">Address<span class="req">*</span></label>
+        <input type="text" id="fAddress" name="fAddress" autocomplete="street-address">
+
+        <label for="fPhone">Phone<span class="req">*</span></label>
+        <div class="field-hint">Format: xxx-xxx-xxxx</div>
+        <input type="text" id="fPhone" name="fPhone" inputmode="numeric" placeholder="404-555-0182" maxlength="12">
+      </fieldset>
+
+      <fieldset>
+        <legend>Incident details</legend>
+
+        <label for="fLocation">Location of incident<span class="req">*</span></label>
+        <input type="text" id="fLocation" name="fLocation">
+
+        <label for="fDate">Date occurred<span class="req">*</span></label>
+        <div class="field-hint">To the best of your knowledge</div>
+        <input type="date" id="fDate" name="fDate">
+
+        <label for="fAgainstName">Name of individual this complaint is against<span class="req">*</span></label>
+        <input type="text" id="fAgainstName" name="fAgainstName">
+
+        <label for="fDescription">Description of incident<span class="req">*</span></label>
+        <div class="field-hint">Please keep under 300 words.</div>
+        <textarea id="fDescription" name="fDescription"></textarea>
+        <div class="word-counter" id="wordCounter">0 / 300 words</div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Supporting evidence</legend>
+        <label for="fEvidence">Attach file <span style="color:#8f8c85;font-weight:400;">(optional)</span></label>
+        <input type="file" id="fEvidence" name="fEvidence" accept=".pdf,.jpg,.jpeg,.png,.heic,.mp4,.mov,.doc,.docx">
+      </fieldset>
+
+      <fieldset>
+        <legend>Resolution requested</legend>
+        <label for="fResolution">What outcome are you hoping for?<span class="req">*</span></label>
+        <div class="field-hint">Please keep under 200 words.</div>
+        <textarea id="fResolution" name="fResolution"></textarea>
+        <div class="word-counter" id="resolutionCounter">0 / 200 words</div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Attestation</legend>
+        <div class="attest-row">
+          <input type="checkbox" id="fAttestCheck" required>
+          <label for="fAttestName">
+            I, <input type="text" id="fAttestName" name="fAttestName" placeholder="full name">
+            do swear, under penalty of perjury the above mentioned facts are true and correct to the best of my knowledge.
+          </label>
+        </div>
+        <label for="fSignature">Initial and sign<span class="req">*</span></label>
+        <input type="text" id="fSignature" name="fSignature" placeholder="Type your initials and full name">
+        <span class="sign-label">This serves as your electronic signature</span>
+      </fieldset>
+
+      <button type="submit" class="submit" id="submitBtn">Submit complaint</button>
+      <div id="formStatus" role="status" aria-live="polite"></div>
+    </div>
+  </form>
+
+  <div class="thank-you" id="thankYou">
+    <h2>Complaint submitted</h2>
+    <p>Thank you — your complaint has been received. Our outreach team reviews every submission and will follow up using the contact information you provided.</p>
+  </div>
+
+  <div class="site-footer">
+    <a href="/privacy.html">Data Privacy Policy</a>
+    <div class="policy-note">Most complaints receive an initial response within 5–7 business days. Follow-up timing depends on the complaint type and outreach team capacity.</div>
+  </div>
+</div>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+  const SUPABASE_URL = 'https://anhhyowtlagqkzkctsfc.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_-k5_rZOUq-Jioz_KZdxhCg_dEzKUOoz';
+  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const complaintAgainst = document.getElementById('complaintAgainst');
+  const onBehalfOf = document.getElementById('onBehalfOf');
+  const myselfFields = document.getElementById('myselfFields');
+  const filingForFieldWrap = document.getElementById('filingForFieldWrap');
+  const gdcFieldWrap = document.getElementById('gdcFieldWrap');
+
+  // Tooltip toggles
+  document.querySelectorAll('.help-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById(btn.dataset.target).classList.toggle('open');
+    });
+  });
+
+  function updateVisibility() {
+    const behalf = onBehalfOf.value;
+    if (behalf === 'myself' || behalf === 'another' || behalf === 'incarcerated_person') {
+      myselfFields.classList.add('show');
+    } else {
+      myselfFields.classList.remove('show');
+    }
+    filingForFieldWrap.classList.toggle('show', behalf === 'another' || behalf === 'incarcerated_person');
+    gdcFieldWrap.classList.toggle('show', behalf === 'incarcerated_person');
+  }
+  onBehalfOf.addEventListener('change', updateVisibility);
+
+  // Phone auto-format: xxx-xxx-xxxx
+  const fPhone = document.getElementById('fPhone');
+  fPhone.addEventListener('input', () => {
+    let digits = fPhone.value.replace(/\D/g, '').slice(0, 10);
+    let out = digits;
+    if (digits.length > 6) out = `${digits.slice(0,3)}-${digits.slice(3,6)}-${digits.slice(6)}`;
+    else if (digits.length > 3) out = `${digits.slice(0,3)}-${digits.slice(3)}`;
+    fPhone.value = out;
+  });
+
+  // Word counter, capped at 300
+  const fDescription = document.getElementById('fDescription');
+  const wordCounter = document.getElementById('wordCounter');
+  fDescription.addEventListener('input', () => {
+    const words = fDescription.value.trim().split(/\s+/).filter(Boolean);
+    if (words.length > 300) {
+      fDescription.value = words.slice(0, 300).join(' ');
+    }
+    const count = fDescription.value.trim().split(/\s+/).filter(Boolean).length;
+    wordCounter.textContent = `${count} / 300 words`;
+    wordCounter.classList.toggle('over', count >= 300);
+  });
+
+  // Resolution requested counter, capped at 200
+  const fResolution = document.getElementById('fResolution');
+  const resolutionCounter = document.getElementById('resolutionCounter');
+  fResolution.addEventListener('input', () => {
+    const words = fResolution.value.trim().split(/\s+/).filter(Boolean);
+    if (words.length > 200) {
+      fResolution.value = words.slice(0, 200).join(' ');
+    }
+    const count = fResolution.value.trim().split(/\s+/).filter(Boolean).length;
+    resolutionCounter.textContent = `${count} / 200 words`;
+    resolutionCounter.classList.toggle('over', count >= 200);
+  });
+
+  // Submit
+  const form = document.getElementById('complaintForm');
+  const submitBtn = document.getElementById('submitBtn');
+  const formStatus = document.getElementById('formStatus');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    formStatus.textContent = '';
+    formStatus.className = '';
+
+    if (!complaintAgainst.value || !onBehalfOf.value) {
+      formStatus.textContent = 'Please complete the two dropdowns above before continuing.';
+      formStatus.className = 'error';
+      return;
+    }
+
+    const behalf = onBehalfOf.value;
+    const required = {
+      name: document.getElementById('fName').value.trim(),
+      address: document.getElementById('fAddress').value.trim(),
+      phone: fPhone.value.trim(),
+      location: document.getElementById('fLocation').value.trim(),
+      date: document.getElementById('fDate').value,
+      against_name: document.getElementById('fAgainstName').value.trim(),
+      description: fDescription.value.trim(),
+      resolution: fResolution.value.trim(),
+      attest_name: document.getElementById('fAttestName').value.trim(),
+      signature: document.getElementById('fSignature').value.trim(),
+    };
+    if (behalf === 'another' || behalf === 'incarcerated_person') {
+      required.filing_for = document.getElementById('fFilingFor').value.trim();
+    }
+    if (behalf === 'incarcerated_person') {
+      required.gdc_number = document.getElementById('fGdcNumber').value.trim();
+    }
+    for (const [key, val] of Object.entries(required)) {
+      if (!val) {
+        formStatus.textContent = 'Please fill in all required fields before submitting.';
+        formStatus.className = 'error';
+        return;
+      }
+    }
+    if (!document.getElementById('fAttestCheck').checked) {
+      formStatus.textContent = 'Please check the attestation box to confirm the facts above are true.';
+      formStatus.className = 'error';
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Submitting…';
+
+    try {
+      let evidenceUrl = null;
+      const fileInput = document.getElementById('fEvidence');
+      if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        const path = `complaints/${Date.now()}_${file.name}`;
+        const { error: uploadError } = await supabase.storage
+          .from('media')
+          .upload(path, file);
+        if (uploadError) throw uploadError;
+        const { data: pub } = supabase.storage.from('media').getPublicUrl(path);
+        evidenceUrl = pub.publicUrl;
+      }
+
+      const { error: insertError } = await supabase.from('complaints').insert({
+        complaint_against: complaintAgainst.value,
+        on_behalf_of: onBehalfOf.value,
+        name: required.name,
+        address: required.address,
+        phone: required.phone,
+        location_of_incident: required.location,
+        date_occurred: required.date,
+        individual_complaint_against: required.against_name,
+        description: required.description,
+        evidence_url: evidenceUrl,
+        resolution_requested: required.resolution,
+        attestation_name: required.attest_name,
+        signature: required.signature,
+        filing_for_name: required.filing_for || null,
+        gdc_number: required.gdc_number || null,
+      });
+      if (insertError) throw insertError;
+
+      form.style.display = 'none';
+      document.getElementById('thankYou').classList.add('show');
+    } catch (err) {
+      console.error(err);
+      formStatus.textContent = 'Something went wrong submitting your complaint. Please try again.';
+      formStatus.className = 'error';
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit complaint';
+    }
+  });
+</script>
+</body>
+        </html>
+          
