@@ -34,6 +34,26 @@
     padding-bottom:16px;
     margin-bottom:28px;
   }
+  .header-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:14px;
+  }
+  .nav-btn{
+    background:transparent;
+    border:1px solid var(--gold-dim);
+    color:var(--gold);
+    padding:6px 14px;
+    font-size:.75rem;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    cursor:pointer;
+    text-decoration:none;
+    display:inline-block;
+    border-radius:4px;
+  }
+  .nav-btn:hover{ border-color:var(--gold); background:var(--black-2); }
   header.page-head .eyebrow{
     color:var(--gold);
     letter-spacing:.14em;
@@ -223,7 +243,10 @@
 <body>
 <div class="wrap">
   <header class="page-head">
-    <div class="eyebrow">Justice &amp; Reform Georgia · PAC Outreach</div>
+    <div class="header-top">
+      <div class="eyebrow">Justice &amp; Reform Georgia · PAC Outreach</div>
+      <a class="nav-btn" href="/index.html">← Home</a>
+    </div>
     <h1>File a Complaint</h1>
     <p class="subtext">Tell us who this is about and who's filing it. Fields marked <span style="color:var(--gold)">*</span> are required.</p>
   </header>
@@ -341,6 +364,7 @@
   <div class="thank-you" id="thankYou">
     <h2>Complaint submitted</h2>
     <p>Thank you — your complaint has been received. Our outreach team reviews every submission and will follow up using the contact information you provided.</p>
+    <a class="nav-btn" href="/index.html" style="margin-top:20px">← Back to Home</a>
   </div>
 
   <div class="site-footer">
@@ -514,5 +538,4 @@
   });
 </script>
 </body>
-        </html>
-          
+</html>
