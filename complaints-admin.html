@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Complaints — Power Action Committee</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #000;
+      color: #fff;
+      font-family: 'Georgia', serif;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #000;
+      border-bottom: 2px solid #C9A84C;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header a.logo img { height: 40px; width: auto; text-decoration: none; }
+    header a.logo { display: flex; align-items: center; text-decoration: none; }
+    .header-right { display: flex; align-items: center; gap: 10px; }
+
+    .nav-btn {
+      background: transparent;
+      border: 1px solid #C9A84C;
+      color: #C9A84C;
+      padding: 6px 14px;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    #auth-check {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 80vh;
+      color: #C9A84C;
+      font-size: 1rem;
+      letter-spacing: 0.05em;
+      text-align: center;
+      padding: 0 20px;
+    }
+
+    #complaints-panel { display: none; padding: 24px 20px; max-width: 680px; margin: 0 auto; }
+
+    h2 {
+      color: #C9A84C;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 20px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #222;
+    }
+
+    .form-group { margin-bottom: 16px; }
+
+    label {
+      display: block;
+      color: #C9A84C;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 6px;
+    }
+
+    textarea, select {
+      width: 100%;
+      background: #111;
+      border: 1px solid #333;
+      color: #fff;
+      padding: 12px;
+      font-size: 0.95rem;
+      font-family: 'Georgia', serif;
+      outline: none;
+    }
+
+    textarea:focus, select:focus { border-color: #C9A84C; }
+    textarea { min-height: 70px; resize: vertical; }
+    select option { background: #111; }
+
+    .btn-outline-gold {
+      background: transparent;
+      border: 1px solid #C9A84C;
+      color: #C9A84C;
+      padding: 8px 16px;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+    }
+
+    .divider { border: none; border-top: 1px solid #1a1a1a; margin: 18px 0; }
+
+    .complaint-card {
+      background: #111;
+      border-left: 3px solid #C9A84C;
+      margin-bottom: 12px;
+    }
+
+    .complaint-summary {
+      padding: 14px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .complaint-summary h3 { color: #fff; font-size: 0.9rem; margin-bottom: 4px; }
+    .complaint-summary p { color: #888; font-size: 0.78rem; }
+
+    .status-badge {
+      display: inline-block;
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 2px 8px;
+      margin-left: 8px;
+      border: 1px solid #555;
+      color: #ccc;
+      vertical-align: middle;
+    }
+
+    .status-badge.status-submitted { border-color: #C9A84C; color: #C9A84C; }
+    .status-badge.status-in_review { border-color: #5b8fd6; color: #5b8fd6; }
+    .status-badge.status-resolved { border-color: #5cb85c; color: #5cb85c; }
+    .status-badge.status-closed { border-color: #555; color: #777; }
+
+    .complaint-details { display: none; padding: 0 14px 16px; border-top: 1px solid #1a1a1a; }
+    .complaint-details.open { display: block; }
+
+    .detail-row { padding: 10px 0; border-bottom: 1px solid #1a1a1a; }
+    .detail-row .detail-label {
+      color: #C9A84C;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .detail-row .detail-value { color: #ddd; font-size: 0.88rem; white-space: pre-wrap; }
+    .detail-row .detail-value a { color: #C9A84C; }
+
+    .note-item {
+      background: #0a0a0a;
+      border-left: 2px solid #333;
+      padding: 8px 10px;
+      margin-bottom: 8px;
+    }
+    .note-item .note-meta { font-size: 0.68rem; color: #666; margin-bottom: 3px; }
+    .note-item .note-text { font-size: 0.85rem; color: #ddd; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="/index.html">
+    <img src="https://i.ibb.co/ZpCgNvdM/download.webp" alt="PAC Logo" />
+  </a>
+  <div class="header-right">
+    <a class="nav-btn" href="/dashboard.html">← Dashboard</a>
+    <button class="nav-btn" onclick="logout()">Sign Out</button>
+  </div>
+</header>
+
+<div id="auth-check">Verifying access...</div>
+
+<div id="complaints-panel">
+  <h2>Complaints</h2>
+
+  <div class="form-group">
+    <label>Filter by Status</label>
+    <select id="complaint-filter" onchange="loadComplaints()">
+      <option value="all">All</option>
+      <option value="submitted">Submitted</option>
+      <option value="in_review">In Review</option>
+      <option value="resolved">Resolved</option>
+      <option value="closed">Closed</option>
+    </select>
+  </div>
+
+  <div id="complaints-list">Loading...</div>
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://anhhyowtlagqkzkctsfc.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_-k5_rZOUq-Jioz_KZdxhCg_dEzKUOoz';
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  let currentUser = null;
+  const STATUS_LABELS = { submitted: 'Submitted', in_review: 'In Review', resolved: 'Resolved', closed: 'Closed' };
+  const BEHALF_LABELS = { myself: 'for themselves', another: 'on behalf of another', incarcerated_person: 'on behalf of an incarcerated person' };
+  const openComplaintIds = new Set();
+
+  async function init() {
+    const authEl = document.getElementById('auth-check');
+    let session;
+    try {
+      const { data, error } = await sb.auth.getSession();
+      if (error) throw error;
+      session = data.session;
+    } catch (e) {
+      authEl.textContent = 'Error checking session: ' + e.message;
+      return;
+    }
+    if (!session) {
+      authEl.innerHTML = 'Access denied. <a href="/login.html" style="color:#C9A84C">Sign in</a>';
+      return;
+    }
+    currentUser = session.user;
+
+    let member;
+    try {
+      const { data, error } = await sb.from('members').select('role').eq('id', currentUser.id).single();
+      if (error) throw error;
+      member = data;
+    } catch (e) {
+      authEl.textContent = 'Error checking role: ' + e.message;
+      return;
+    }
+    if (!member || member.role !== 'admin') {
+      authEl.textContent = 'Access denied. Admins only.';
+      return;
+    }
+
+    authEl.style.display = 'none';
+    document.getElementById('complaints-panel').style.display = 'block';
+    loadComplaints();
+  }
+
+  async function logout() {
+    await sb.auth.signOut();
+    window.location.href = '/login.html';
+  }
+
+  async function loadComplaints() {
+    const filter = document.getElementById('complaint-filter').value;
+    let query = sb.from('complaints').select('*').order('created_at', { ascending: false });
+    if (filter !== 'all') query = query.eq('status', filter);
+    const { data: complaints, error } = await query;
+
+    const list = document.getElementById('complaints-list');
+    if (error) { list.innerHTML = '<p style="color:#e55;font-size:0.85rem">Error loading complaints: ' + error.message + '</p>'; return; }
+    if (!complaints?.length) { list.innerHTML = '<p style="color:#555;font-size:0.85rem">No complaints yet.</p>'; return; }
+
+    list.innerHTML = complaints.map(c => `
+      <div class="complaint-card" data-id="${c.id}">
+        <div class="complaint-summary" onclick="toggleComplaint('${c.id}')">
+          <div>
+            <h3>${c.individual_complaint_against}<span class="status-badge status-${c.status}">${STATUS_LABELS[c.status] || c.status}</span></h3>
+            <p>${c.complaint_against === 'official' ? 'Official' : 'Prison / Jail'} · Filed ${BEHALF_LABELS[c.on_behalf_of] || c.on_behalf_of} · ${new Date(c.created_at).toLocaleDateString()}</p>
+          </div>
+        </div>
+        <div class="complaint-details" id="details-${c.id}">
+          <div class="detail-row"><div class="detail-label">Filed By</div><div class="detail-value">${c.name} · ${c.phone}</div></div>
+          <div class="detail-row"><div class="detail-label">Address</div><div class="detail-value">${c.address}</div></div>
+          ${c.filing_for_name ? `<div class="detail-row"><div class="detail-label">Filing For</div><div class="detail-value">${c.filing_for_name}</div></div>` : ''}
+          ${c.gdc_number ? `<div class="detail-row"><div class="detail-label">GDC #</div><div class="detail-value">${c.gdc_number}</div></div>` : ''}
+          <div class="detail-row"><div class="detail-label">Location of Incident</div><div class="detail-value">${c.location_of_incident}</div></div>
+          <div class="detail-row"><div class="detail-label">Date Occurred</div><div class="detail-value">${c.date_occurred}</div></div>
+          <div class="detail-row"><div class="detail-label">Description</div><div class="detail-value">${c.description}</div></div>
+          <div class="detail-row"><div class="detail-label">Resolution Requested</div><div class="detail-value">${c.resolution_requested}</div></div>
+          ${c.evidence_url ? `<div class="detail-row"><div class="detail-label">Supporting Evidence</div><div class="detail-value"><a href="${c.evidence_url}" target="_blank" rel="noopener">View file</a></div></div>` : ''}
+          <div class="detail-row"><div class="detail-label">Attestation</div><div class="detail-value">${c.attestation_name} — signed "${c.signature}"</div></div>
+
+          <div class="form-group" style="margin-top:14px">
+            <label>Update Status</label>
+            <select onchange="updateStatus('${c.id}', this.value)">
+              ${Object.keys(STATUS_LABELS).map(s => `<option value="${s}" ${c.status === s ? 'selected' : ''}>${STATUS_LABELS[s]}</option>`).join('')}
+            </select>
+          </div>
+
+          <hr class="divider" />
+          <h2 style="font-size:0.85rem">Internal Notes</h2>
+          <div id="notes-${c.id}">Loading notes...</div>
+          <div class="form-group" style="margin-top:10px">
+            <textarea id="note-input-${c.id}" placeholder="Add a note for the outreach team..."></textarea>
+          </div>
+          <button class="btn-outline-gold" onclick="addNote('${c.id}')">Add Note</button>
+        </div>
+      </div>
+    `).join('');
+
+    openComplaintIds.forEach(id => {
+      const details = document.getElementById('details-' + id);
+      if (details) { details.classList.add('open'); loadNotes(id); }
+    });
+  }
+
+  function toggleComplaint(id) {
+    const details = document.getElementById('details-' + id);
+    const isOpen = details.classList.toggle('open');
+    if (isOpen) { openComplaintIds.add(id); loadNotes(id); }
+    else { openComplaintIds.delete(id); }
+  }
+
+  async function updateStatus(id, status) {
+    const { error } = await sb.from('complaints').update({ status }).eq('id', id);
+    if (!error) {
+      const badge = document.querySelector(`.complaint-card[data-id="${id}"] .status-badge`);
+      if (badge) { badge.className = 'status-badge status-' + status; badge.textContent = STATUS_LABELS[status]; }
+    }
+  }
+
+  async function loadNotes(id) {
+    const wrap = document.getElementById('notes-' + id);
+    const { data: notes, error } = await sb
+      .from('complaint_notes')
+      .select('*, members(full_name)')
+      .eq('complaint_id', id)
+      .order('created_at', { ascending: true });
+
+    if (error) { wrap.innerHTML = '<p style="color:#e55;font-size:0.8rem">Error loading notes.</p>'; return; }
+    if (!notes?.length) { wrap.innerHTML = '<p style="color:#555;font-size:0.8rem">No notes yet.</p>'; return; }
+
+    wrap.innerHTML = notes.map(n => `
+      <div class="note-item">
+        <div class="note-meta">${n.members?.full_name || 'Admin'} · ${new Date(n.created_at).toLocaleString()}</div>
+        <div class="note-text">${n.note}</div>
+      </div>
+    `).join('');
+  }
+
+  async function addNote(id) {
+    const input = document.getElementById('note-input-' + id);
+    const note = input.value.trim();
+    if (!note) return;
+
+    const { error } = await sb.from('complaint_notes').insert({
+      complaint_id: id,
+      author_id: currentUser.id,
+      note
+    });
+    if (!error) { input.value = ''; loadNotes(id); }
+  }
+
+  init();
+</script>
+
+</body>
+  </html>
+
