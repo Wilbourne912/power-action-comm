@@ -475,14 +475,38 @@
 
   // ── AUTH ──
   async function init() {
-    const { data: { session } } = await sb.auth.getSession();
+    console.log('[debug] init started');
+    const sessionPromise = sb.auth.getSession();
+    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('getSession timed out after 6s')), 6000));
+    let session;
+    try {
+      const result = await Promise.race([sessionPromise, timeout]);
+      session = result.data.session;
+      console.log('[debug] getSession resolved, session exists:', !!session);
+    } catch (e) {
+      console.log('[debug] getSession HUNG/FAILED:', e.message);
+      document.getElementById('auth-check').innerHTML = 'Debug: getSession hung — ' + e.message;
+      return;
+    }
     if (!session) {
       document.getElementById('auth-check').innerHTML = 'Access denied. <a href="/login.html" style="color:#C9A84C">Sign in</a>';
       return;
     }
     currentUser = session.user;
+    console.log('[debug] currentUser set:', currentUser.id);
 
-    const { data: member } = await sb.from('members').select('role').eq('id', currentUser.id).single();
+    const memberPromise = sb.from('members').select('role').eq('id', currentUser.id).single();
+    const memberTimeout = new Promise((_, reject) => setTimeout(() => reject(new Error('members query timed out after 6s')), 6000));
+    let member;
+    try {
+      const result = await Promise.race([memberPromise, memberTimeout]);
+      member = result.data;
+      console.log('[debug] members query resolved:', JSON.stringify(member), 'error:', JSON.stringify(result.error));
+    } catch (e) {
+      console.log('[debug] members query HUNG/FAILED:', e.message);
+      document.getElementById('auth-check').innerHTML = 'Debug: members query hung — ' + e.message;
+      return;
+    }
     if (!member || member.role !== 'admin') {
       document.getElementById('auth-check').innerHTML = 'Access denied. Admins only.';
       return;
@@ -490,6 +514,7 @@
 
     document.getElementById('auth-check').style.display = 'none';
     document.getElementById('admin-panel').style.display = 'block';
+    console.log('[debug] admin panel unlocked, loading tabs');
     loadPosts();
     loadSettings();
     loadCards();
@@ -624,35 +649,4 @@
     const btn = document.getElementById('add-card-btn');
     const status = document.getElementById('card-status');
 
-    if (!title) { status.textContent = 'Please enter a title.'; status.className = 'status-msg error'; return; }
-
-    btn.disabled = true;
-    status.textContent = 'Adding card...';
-    status.className = 'status-msg';
-
-    let image_url = null;
-    if (file) {
-      try { image_url = await uploadFile(file); }
-      catch(e) { status.textContent = 'Upload failed: ' + e.message; status.className = 'status-msg error'; btn.disabled = false; return; }
-    }
-
-    const { error } = await sb.from('focus_cards').insert({ title, description, image_url });
-    if (error) {
-      status.textContent = 'Error: ' + error.message;
-      status.className = 'status-msg error';
-    } else {
-      status.textContent = 'Card added.';
-      status.className = 'status-msg';
-      document.getElementById('card-title').value = '';
-      document.getElementById('card-desc').value = '';
-      document.getElementById('card-image-file').value = '';
-      document.getElementById('card-file-name').textContent = 'No file selected';
-      loadCards();
-    }
-    btn.disabled = false;
-  }
-
-  async function loadCards() {
-    const { data: cards } = await sb.from('focus_cards').select('*').order('display_order');
-    const list = document.getElementById('cards-list');
-    if (!cards?.length) { l
+    if (!title) { s
