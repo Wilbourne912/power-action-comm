@@ -203,6 +203,7 @@
   const STATUS_LABELS = { submitted: 'Submitted', in_review: 'In Review', resolved: 'Resolved', closed: 'Closed' };
   const BEHALF_LABELS = { myself: 'for themselves', another: 'on behalf of another', incarcerated_person: 'on behalf of an incarcerated person' };
   const openComplaintIds = new Set();
+let userComplaintCounts = {};
 
   async function init() {
     const authEl = document.getElementById('auth-check');
@@ -245,22 +246,42 @@
     window.location.href = '/login.html';
   }
 
+ async function loadUserComplaintCounts() {
+    const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString();
+    const { data } = await sb
+      .from('complaints')
+      .select('user_id')
+      .gte('created_at', sixtyDaysAgo);
+
+    userComplaintCounts = {};
+    (data || []).forEach(row => {
+      if (!row.user_id) return;
+      userComplaintCounts[row.user_id] = (userComplaintCounts[row.user_id] || 0) + 1;
+    });
+  }
+
   async function loadComplaints() {
     const filter = document.getElementById('complaint-filter').value;
     let query = sb.from('complaints').select('*').order('created_at', { ascending: false });
     if (filter !== 'all') query = query.eq('status', filter);
-    const { data: complaints, error } = await query;
+    const [{ data: complaints, error }] = await Promise.all([query, loadUserComplaintCounts()]);
 
     const list = document.getElementById('complaints-list');
     if (error) { list.innerHTML = '<p style="color:#e55;font-size:0.85rem">Error loading complaints: ' + error.message + '</p>'; return; }
     if (!complaints?.length) { list.innerHTML = '<p style="color:#555;font-size:0.85rem">No complaints yet.</p>'; return; }
 
-    list.innerHTML = complaints.map(c => `
+    list.innerHTML = complaints.map(c => {
+      const count = c.user_id ? (userComplaintCounts[c.user_id] || 0) : null;
+      const countLine = count === null
+        ? ''
+        : `<p style="color:${count >= 3 ? '#e55' : '#888'};font-size:0.78rem;margin-top:2px">${count} complaint${count === 1 ? '' : 's'} from this user in last 60 days</p>`;
+      return `
       <div class="complaint-card" data-id="${c.id}">
         <div class="complaint-summary" onclick="toggleComplaint('${c.id}')">
           <div>
             <h3>${c.individual_complaint_against}<span class="status-badge status-${c.status}">${STATUS_LABELS[c.status] || c.status}</span></h3>
             <p>${c.complaint_against === 'official' ? 'Official' : 'Prison / Jail'} · Filed ${BEHALF_LABELS[c.on_behalf_of] || c.on_behalf_of} · ${new Date(c.created_at).toLocaleDateString()}</p>
+            ${countLine}
           </div>
         </div>
         <div class="complaint-details" id="details-${c.id}">
@@ -291,7 +312,8 @@
           <button class="btn-outline-gold" onclick="addNote('${c.id}')">Add Note</button>
         </div>
       </div>
-    `).join('');
+    `;
+    }).join('');
 
     openComplaintIds.forEach(id => {
       const details = document.getElementById('details-' + id);
@@ -350,5 +372,4 @@
 </script>
 
 </body>
-  </html>
-
+</html>
