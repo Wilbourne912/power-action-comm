@@ -389,6 +389,23 @@
   const SUPABASE_KEY = 'sb_publishable_-k5_rZOUq-Jioz_KZdxhCg_dEzKUOoz';
   const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
+  let complaintLimitReached = false;
+
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (user) {
+    const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString();
+    const { count } = await supabase
+      .from('complaints')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .gte('created_at', sixtyDaysAgo);
+
+    if (count !== null && count >= 3) {
+      complaintLimitReached = true;
+    }
+  }
+
   const complaintAgainst = document.getElementById('complaintAgainst');
   const onBehalfOf = document.getElementById('onBehalfOf');
   const myselfFields = document.getElementById('myselfFields');
@@ -459,6 +476,12 @@
     e.preventDefault();
     formStatus.textContent = '';
     formStatus.className = '';
+
+    if (complaintLimitReached) {
+      formStatus.textContent = 'You\'ve reached the limit of 3 complaints every 60 days. Please try again later.';
+      formStatus.className = 'error';
+      return;
+    }
 
     if (!complaintAgainst.value || !onBehalfOf.value) {
       formStatus.textContent = 'Please complete the two dropdowns above before continuing.';
@@ -538,7 +561,11 @@
       document.getElementById('thankYou').classList.add('show');
     } catch (err) {
       console.error(err);
-      formStatus.textContent = 'Something went wrong submitting your complaint. Please try again.';
+      if (err.message && err.message.includes('limit of 3 complaints')) {
+        formStatus.textContent = 'You\'ve reached the limit of 3 complaints every 60 days. Please try again later.';
+      } else {
+        formStatus.textContent = 'Something went wrong submitting your complaint. Please try again.';
+      }
       formStatus.className = 'error';
     } finally {
       submitBtn.disabled = false;
