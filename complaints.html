@@ -573,5 +573,210 @@
     }
   });
 </script>
+
+    <!-- PAC Complaint Guide Widget: paste this block right before </body> on complaints.html -->
+<style>
+  #pac-chat-launcher {
+    position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+    display: flex; align-items: center; gap: 8px;
+    background: #D4AF37; color: #0a0a0a; border: none; border-radius: 999px;
+    padding: 12px 20px; font-family: 'Source Sans Pro', Arial, sans-serif;
+    font-weight: 600; font-size: 0.95rem; cursor: pointer;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+  }
+  #pac-chat-panel {
+    position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+    width: 360px; max-width: 90vw; height: 520px; max-height: 80vh;
+    background: #0a0a0a; border: 1px solid #D4AF37; border-radius: 12px;
+    display: none; flex-direction: column; overflow: hidden;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+    font-family: 'Source Sans Pro', Arial, sans-serif;
+  }
+  #pac-chat-panel.open { display: flex; }
+  #pac-chat-header {
+    display: flex; align-items: center; justify-content: space-between;
+    background: #000; border-bottom: 1px solid #D4AF37; padding: 12px 16px;
+  }
+  #pac-chat-header span {
+    font-family: 'Playfair Display', serif; color: #fff; font-size: 1.05rem; font-weight: 700;
+  }
+  #pac-chat-close { background: none; border: none; color: #D4AF37; font-size: 1.2rem; cursor: pointer; }
+  #pac-chat-messages {
+    flex: 1; overflow-y: auto; padding: 12px 16px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .pac-msg {
+    max-width: 88%; padding: 8px 12px; border-radius: 10px;
+    font-size: 0.88rem; line-height: 1.45;
+  }
+  .pac-msg.user { align-self: flex-end; background: #D4AF37; color: #0a0a0a; }
+  .pac-msg.assistant { align-self: flex-start; background: #1c1c1c; color: #eee; }
+  .pac-msg.assistant a { color: #D4AF37; }
+  #pac-chat-suggestions {
+    display: flex; flex-wrap: wrap; gap: 6px; padding: 0 16px 10px 16px;
+  }
+  .pac-chip {
+    background: #1c1c1c; border: 1px solid #333; color: #ccc;
+    border-radius: 999px; padding: 5px 10px; font-size: 0.75rem;
+    cursor: pointer;
+  }
+  .pac-chip:hover { border-color: #D4AF37; color: #D4AF37; }
+  #pac-chat-inputrow {
+    display: flex; align-items: center; gap: 8px; padding: 12px;
+    border-top: 1px solid #333;
+  }
+  #pac-chat-input {
+    flex: 1; background: #1c1c1c; border: 1px solid #333; border-radius: 8px;
+    padding: 8px 10px; color: #fff; font-size: 0.85rem; outline: none;
+  }
+  #pac-chat-send {
+    background: #D4AF37; border: none; border-radius: 8px;
+    width: 36px; height: 36px; cursor: pointer; font-size: 1rem;
+  }
+</style>
+
+<button id="pac-chat-launcher" onclick="pacChatToggle(true)">💬 Guide Me</button>
+
+<div id="pac-chat-panel">
+  <div id="pac-chat-header">
+    <span>Complaint Form Help</span>
+    <button id="pac-chat-close" onclick="pacChatToggle(false)">&times;</button>
+  </div>
+  <div id="pac-chat-messages"></div>
+  <div id="pac-chat-suggestions"></div>
+  <div id="pac-chat-inputrow">
+    <input id="pac-chat-input" type="text" placeholder="Ask a question..." />
+    <button id="pac-chat-send" onclick="pacChatSend()">➤</button>
+  </div>
+</div>
+
+<script>
+  // ---- Complaint form guidance content ----
+  const PAC_FAQ = [
+    {
+      keywords: ["complaint against", "official or prison", "official", "prison", "jail", "first dropdown"],
+      answer: "\"Complaint against\" is the first dropdown — choose Official if this is about a public official, staff member, or business contact. Choose Prison/Jail if it's about a specific facility."
+    },
+    {
+      keywords: ["on behalf of", "myself", "another person", "who am i filing for", "second dropdown"],
+      answer: "\"I am complaining on behalf of\" is the second dropdown. Pick Myself, Another Person, or An Incarcerated Person. Choosing Another Person or Incarcerated Person will add an extra field asking for that person's name."
+    },
+    {
+      keywords: ["gdc", "gdc number", "inmate number", "incarcerated"],
+      answer: "If you selected \"An incarcerated person,\" you'll also be asked for their GDC # (Georgia Department of Corrections number) in addition to their name."
+    },
+    {
+      keywords: ["your information", "name", "address", "phone", "contact info"],
+      answer: "Your Information asks for your name, address, and phone number (format xxx-xxx-xxxx) — this is how our outreach team follows up with you."
+    },
+    {
+      keywords: ["incident", "location", "date occurred", "what happened", "against name", "individual"],
+      answer: "Incident Details asks for the location of the incident, the date it occurred (to the best of your knowledge), and the name of the individual the complaint is against."
+    },
+    {
+      keywords: ["description", "300 word", "describe", "what happened in detail"],
+      answer: "Description of Incident has a 300-word limit — the box will stop you from typing further once you hit it, and shows a live word counter."
+    },
+    {
+      keywords: ["evidence", "attach", "upload", "file", "photo", "document"],
+      answer: "Supporting Evidence is optional. You can attach a PDF, image (jpg/png/heic), video (mp4/mov), or Word doc if you have it."
+    },
+    {
+      keywords: ["resolution", "outcome", "200 word", "what do you want"],
+      answer: "Resolution Requested asks what outcome you're hoping for, capped at 200 words with its own counter."
+    },
+    {
+      keywords: ["attest", "perjury", "sign", "signature", "swear"],
+      answer: "Attestation requires checking the box confirming the facts are true under penalty of perjury, and typing your initials and full name in the signature field — this counts as your electronic signature."
+    },
+    {
+      keywords: ["limit", "how many", "3 complaints", "60 days", "rate limit"],
+      answer: "You can file up to 3 complaints every 60 days. If you're over that limit the form will let you know when you try to submit."
+    },
+    {
+      keywords: ["how long", "response", "hear back", "follow up", "when"],
+      answer: "Most complaints get an initial response within 5–7 business days. Follow-up timing after that depends on the complaint type and outreach team capacity."
+    },
+    {
+      keywords: ["sign in", "login", "account", "not logged in"],
+      answer: "You need to be signed in to submit a complaint so our team can follow up with you and so the 3-per-60-days limit can be tracked.",
+      link: "login.html", linkText: "Go to Login"
+    }
+  ];
+
+  const PAC_FALLBACK = "I'm not sure about that one yet — try asking about the dropdowns at the top, your info, incident details, evidence, or the attestation/signature section.";
+  const PAC_SUGGESTED_CHIPS = ["What's the first dropdown?", "Word limits?", "Do I need to sign in?", "How long until I hear back?"];
+  // ---------------------------------------------------------------
+
+  let pacChatStarted = false;
+
+  function pacChatToggle(open) {
+    document.getElementById('pac-chat-panel').classList.toggle('open', open);
+    if (open && !pacChatStarted) {
+      pacChatStarted = true;
+      pacChatRender('assistant', "Hi — I can walk you through this form section by section. What's tripping you up?");
+      pacChatRenderChips();
+    }
+  }
+
+  function pacChatRender(role, html) {
+    const el = document.createElement('div');
+    el.className = 'pac-msg ' + role;
+    el.innerHTML = html;
+    document.getElementById('pac-chat-messages').appendChild(el);
+    const container = document.getElementById('pac-chat-messages');
+    container.scrollTop = container.scrollHeight;
+  }
+
+  function pacChatRenderChips() {
+    const box = document.getElementById('pac-chat-suggestions');
+    box.innerHTML = '';
+    PAC_SUGGESTED_CHIPS.forEach(function(q) {
+      const chip = document.createElement('button');
+      chip.className = 'pac-chip';
+      chip.textContent = q;
+      chip.onclick = function() { pacChatAsk(q); };
+      box.appendChild(chip);
+    });
+  }
+
+  function pacChatAnswer(query) {
+    const q = query.toLowerCase();
+    for (const item of PAC_FAQ) {
+      if (item.keywords.some(function(k) { return q.includes(k); })) {
+        let html = escapeHtml(item.answer);
+        if (item.link) {
+          html += ' <a href="' + item.link + '">' + item.linkText + ' &rarr;</a>';
+        }
+        return html;
+      }
+    }
+    return escapeHtml(PAC_FALLBACK);
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function pacChatAsk(text) {
+    pacChatRender('user', escapeHtml(text));
+    pacChatRender('assistant', pacChatAnswer(text));
+  }
+
+  function pacChatSend() {
+    const input = document.getElementById('pac-chat-input');
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = '';
+    pacChatAsk(text);
+  }
+
+  document.getElementById('pac-chat-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') pacChatSend();
+  });
+</script>
+  
 </body>
 </html>
